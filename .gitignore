@@ -16,3 +16,6 @@ __pycache__/
 *.log
 .DS_Store
 Thumbs.db
+
+# ---- 无关缓存（疑似某软件误生成的图标缓存，非项目文件） ----
+Echo_Simulation/output/resources/

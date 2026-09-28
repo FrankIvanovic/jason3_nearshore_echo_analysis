@@ -13,6 +13,8 @@ SGDR-T 回波数据为基础，分析近海条件下海洋参数（海面高度/
 |---|---|
 | [`Data_Reading/`](Data_Reading/) | Jason-3 SGDR-T NetCDF 数据读取、波形可视化、轨迹地图与中国近海检索工具集（Python）。详细用法见其 [README](Data_Reading/README.md) |
 | [`Sea_Surface_Simulation/`](Sea_Surface_Simulation/) | 二维高斯谱随机粗糙面仿真（MATLAB，FFT 线性滤波法） |
+| [`Echo_Simulation/`](Echo_Simulation/) | 基于 PM 谱海面的高度计海洋回波波形仿真（Python，逐面元时域法 + Brown 模型对照），详见其 [README](Echo_Simulation/README.md) |
+| [`Retracking/`](Retracking/) | 海洋参数（SSH/SWH/σ⁰-风速）反演与三层误差分析（阈值法 + Brown 拟合 + Hayne 二阶模型 + Jason-3 实测对照），详见其 [README](Retracking/README.md) |
 | `参考文献/` | **不随仓库分发**（体积约 1.5 GB 且涉及版权，已在 .gitignore 中排除） |
 
 ## 环境要求
