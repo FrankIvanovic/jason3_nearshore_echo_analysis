@@ -19,6 +19,7 @@ NetCDF 数据的通用读取、波形可视化、轨迹地图与中国近海检�
 | `plot_track.py` | 轨迹地图：Esri 卫星瓦片底图 + 轨迹线 + 20Hz 采样点（按地表分类或时间着色） |
 | `scan_nearshore.py` | 全库扫描，检索中国近海采样区段，输出 `nearshore_scan.csv` |
 | `present_nearshore.py` | 一键生成中国近海成品图（总览/放大轨迹 + 瀑布 + 堆叠 + 典型波形对比） |
+| `oifd_reader.py` | **OIFD 1.0 融合 SWH 产品读取库**（中国全球海洋融合数据，0.08° 月平均，2019-2021），气候态分析 + 论文用图 |
 | `nearshore_scan.csv` | 全库扫描结果明细（8699 个文件的中国海区命中统计） |
 | `output/` | 成品图输出目录 |
 
@@ -134,3 +135,29 @@ python present_nearshore.py
 5. **cycle 范围**：数据含 500–513 与 600–624 两段，硬编码 500~513 会漏一半。
 6. **地表分类与离岸距离不一致**：两者来自不同的海岸线数据源，近岸
    （尤其岛屿、滩涂、海冰）处可能出现"海面点离岸为负"的现象，属正常。
+
+## 8. OIFD 1.0 融合有效波高产品（外部参照数据）
+
+`oifd_reader.py` 读取仓库 `参考文献/中国全球海洋融合数据1.0-有效波高/`
+下的 36 个月文件（`OIFD_0p08_Significant_Wave_Height_YYYYMM.nc`，
+201901–202112，每个约 40 MB）：0.08°（≈9 km）月平均 SWH 格点场，
+`latitude(2251) × longitude(4500)`，单位 m，陆地/缺测 NaN。
+路径含中文，同 jason3_reader 只用 h5py。
+
+**时间口径注意**：OIFD 覆盖 2019-2021，而手头 Jason-3 数据全部是
+2025 年（cycle 500–513 / 600–624），两者不重叠——该产品只作
+**海况气候态背景与空间参照**（仿真海况档位选取依据、验证弧段所处
+海况环境、近岸-开阔海波高梯度），不做逐点时间配准验证。
+
+```bash
+python oifd_reader.py --info 202007         # 某月文件信息
+python oifd_reader.py --point 26.0 121.5    # 单点 36 个月序列
+python oifd_reader.py --demo                # 论文用图（需 H 盘读轨迹）
+python oifd_reader.py --demo --no-track     # 不叠加 Jason-3 轨迹
+```
+
+输出（`output/`）：`oifd_july_field.png`（7 月气候态场 + c603p147 轨迹）、
+`oifd_climatology_track.png`（弧段近海组 ≤20 km vs 开阔海组 ≥50 km
+逐月 SWH，2019—2021）、`oifd_track_series.csv`（曲线数据）。
+已确认的定性结论：闽浙沿岸近海组 SWH 系统性低于开阔海组约 0.3–0.5 m；
+季节循环为冬季风（10—1 月）高、夏季（4—8 月）低，9—11 月偶见台风峰。
