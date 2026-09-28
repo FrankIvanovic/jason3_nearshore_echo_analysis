@@ -1,0 +1,18 @@
+# ---- 原始数据与派生大文件不入库 ----
+*.nc
+参考文献/
+
+# ---- 缓存与临时文件 ----
+__pycache__/
+*.py[cod]
+.tile_cache/
+.ipynb_checkpoints/
+
+# ---- IDE ----
+.idea/
+.vscode/
+
+# ---- 运行产物（成品图保留在 Data_Reading/output/，不排除） ----
+*.log
+.DS_Store
+Thumbs.db
