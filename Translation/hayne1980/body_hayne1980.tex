@@ -1,0 +1,297 @@
+% Hayne (1980) Radar Altimeter Mean Return Waveforms from Near-Normal-Incidence Ocean Surface Scattering 中文译文
+\section*{\dengxian 近正入射海面散射的雷达高度计平均回波波形}
+\vskip 0.5em
+
+\subsection*{摘要}
+\seccontent
+在雷达测高学的常见假设下，短脉冲雷达照射粗糙海面、近正入射散射时的平均后向散射回波功率由若干项的卷积给出。当近似高斯形的发射脉冲照射近似高斯分布的海面时，对卷积中的一项作小宗量级数展开，即可得到平均回波波形的多项幂级数展开式。本文给出了前四项的具体表达式。与原本必需的数值卷积相比，这些结果所需的计算机时大为减少，既可用于现有及历史雷达高度计的数据分析，也可用于未来系统的设计研究。文中针对一个理想化的 SEASAT 雷达高度计给出了若干代表性结果。
+
+\section{引言}
+\seccontent
+美国国家航空航天局（NASA）近来发射的两颗地球轨道卫星 GEOS-3 和 SEASAT-1 均搭载了脉宽受限雷达高度计，并可在单个雷达回波波形中采样多个点\footnote{GEOS-3 具有 16 个间隔 6.25 ns 的波形采样保持（S\&H）波门，而 SEASAT-1 具有 60 个间隔 3.125 ns 的采样保持波门。}。对这类及类似系统而言，平均回波波形\textsuperscript{[1]}是以下三项的卷积：a) 准平静海面的平均冲激响应；b) 海面高程分布；c) 雷达系统点目标响应（受接收机带宽影响的发射脉冲）。其中第一项 a) 包含天线波束宽度与偏离天底指向角的影响；“准平静”一词强调这里假设的是非相干的表面散射过程，而海面高程分布则单独写在 b) 中。
+
+已有大量文献\textsuperscript{[2]--[7]}描述了如何从高度计波形采样中提取海洋有效波高（SWH）。SWH 正比于表面高程分布的二阶矩；此外还有关于表面偏度的初步高度计测量\textsuperscript{[5]}，偏度与高程分布的三阶矩有关。这些文献采用的都是同一基本流程：先对海面假定某种具体的概率分布形式（通常为简单高斯分布）；必要时从波形采样数据中剔除幅度偏置和定时偏置；选取适当的波形采样平均时间；然后通过不断调整模板参数，使理论模板与平均采样回波波形最优拟合，直至满足某种典型的最小二乘误差准则\footnote{模板拟合流程也有一个例外，见文献[8]：Priester 与 Miller 试图在不假定具体函数形式的前提下估计表面高度概率密度函数；该方法难以实现和解释，本文不予考虑。}。在若干文献\textsuperscript{[3]}中，改为对相邻波形采样值之差拟合理论回波波形的导数，但这只是基本拟合流程的一个小变体。在一般的模板拟合中，要么 1) 对各卷积项假定简化形式，使最终表达式简单、适合较短的计算机运行时间；要么 2) 采用更一般、更完备的模板，但代价是在直线拟合过程中需要对每个采样点完成多次数值卷积，计算时间很长。
+
+本文针对如下情形给出雷达平均回波波形的一般表达式：海面高程分布与雷达系统点目标响应均可表示为含偏度项和峰度项的修正高斯形式，且天线方向图可假设随角度呈高斯形；对于小的偏离天底角，这些表达式给出波形上升时间区（“斜坡段”）内所关注时刻的平均回波波形。这些表达式既可用于从实验数据估计波形参数，也可用于在未来雷达高度计的设计研究中生成波形。用数值卷积也能得到可比的结果，但本文表达式有两方面优点：一是减少计算时间，二是避免了任何数值卷积建模研究都绕不开的采样密度与舍入误差等细节问题。
+
+\section{平均回波波形的计算}
+\seccontent
+本文工作以 Brown 的论文\textsuperscript{[1]}为基础，该文综述了短脉冲雷达波形近正入射粗糙表面后向散射卷积模型的假设与局限。一般经平方律检波后的波形 $W(t)$ 由卷积给出
+\[
+W(t) = P_{FS}(t)*q_{s}(t)*s_{r}(t)
+\tag{1}
+\]
+式中 $P_{FS}(t)$ 为平均平坦表面冲激响应，$q_{s}(t)$ 与散射元（镜面点）表面高程概率密度相关，$s_{r}(t)$ 为雷达系统点目标响应。(1) 式中的三项将分别讨论；然后通过对 Brown 的 $P_{FS}(t)$ 作小宗量级数展开，把 (1) 式的 $W(t)$ 表示为幂级数，并求出其前四项\footnote{为充分逼近波形所需的幂级数项数是卫星高度、偏离天底角、雷达脉宽以及所要求计算的回波波形晚到程度的函数。图 1、图 2 及第 III 节中对这两幅图的讨论给出了典型应用中级数展开的收敛情况。}。
+
+\subsection*{A. 平均平坦表面冲激响应函数}
+
+对实用星载雷达高度计，平坦表面冲激响应由文献 [1, 式(9)] 给出
+\[
+P_{FS}(t) = A\exp(-\delta t)\,I_{0}(t^{1/2}\beta)\,U(t)
+\tag{2}
+\]
+其中
+\[
+\delta = (4/\gamma)(c/h)\cos(2\xi)
+\tag{3}
+\]
+且
+\[
+\beta = (4/\gamma)(c/h)^{1/2}\sin(2\xi).
+\tag{4}
+\]
+(2) 式中 $U(t)$ 为单位阶跃函数，$I_{0}(t^{1/2}\beta)$ 为修正贝塞尔函数，$\xi$ 为偏离天底指向角的绝对值。(3)、(4) 式中 $c$ 为光速，$h$ 为卫星高度，$\gamma$ 为天线波束宽度参数，其定义与 Brown 的 [1, 式(4)] 相同，即用如下形式的高斯近似表示天线增益
+\[
+G(\theta) = G_{0}\exp\left[-(2/\gamma)\sin^{2}\theta\right].
+\tag{5}
+\]
+若 $\theta_{w}$ 为通常意义的天线波束宽度，即半功率点之间的全角宽，则 (3)、(4) 式可写为
+\[
+\delta = \frac{\ln 4}{\sin^{2}\left(\theta_{w}/2\right)}\,(c/h)\cos(2\xi)
+\tag{6}
+\]
+和
+\[
+\beta = \frac{\ln 4}{\sin^{2}\left(\theta_{w}/2\right)}\,(c/h)^{1/2}\sin(2\xi).
+\tag{7}
+\]
+(2) 式中的幅度项 $A$ 包含若干常数：
+\[
+A = \frac{G_{0}^{2}\lambda^{2}c\,\sigma^{0}(0)}{4(4\pi)^{2}L_{p}\,h^{3}}\exp\left(-\frac{4}{\gamma}\sin^{2}\xi\right)
+\tag{8}
+\]
+其中 $\lambda$ 为雷达波长，$\sigma^{0}(0)$ 为海面正入射后向散射截面，$G_{0}$ 为雷达天线视轴增益，$L_{p}$ 为自由空间损耗之外额外计入的双程传播损耗。
+
+(8) 式忽略了 $\sigma^{0}$ 随入射角（等价地，随回波波形时间的增长）的可能变化；对本文所考虑的短脉冲（脉宽小于 20 ns）雷达高度计的海面散射，这是一个合理的假设。由于雷达回波信号通常经自动增益控制系统归一化，我们忽略 (8) 式 $A$ 中的所有个别因子，把 $A$ 当作一个简单的幅度定标因子。
+
+\subsection*{B. 雷达观测的表面高程密度函数}
+
+(1) 式中的 $q_{s}(t)$ 是以高度计时域表示的表面镜面点密度函数；由以米计的表面高程测量换算到以纳秒计的双程测距时间的转换因子为 $c/2 = 0.15$ m/ns。对位于海洋上空的卫星高度计，海面下降会使高度计测距时间增大。因此，与高程“以出表面向上为正”定义的海洋学高程分布相比，这种以时域描述的表面高程分布的各奇次矩符号相反。特别地，本文的表面偏度与海洋学的偏度符号相反。本文采用通常的假设，即表面镜面点密度函数与真实（几何）表面高程密度函数相同；但雷达观测的高程密度与真实几何高程密度之间可能存在差异，这仍是留待将来研究的悬而未决的问题\footnote{Yaplee 等人的雷达测量\textsuperscript{[15]}可解读\textsuperscript{[16]}为：散射分布的均值相对真实水位向下偏移了均方根波高的 20\%；Jackson\textsuperscript{[17]}最近在无限长峰波浪假设下的理论工作与这些测量一致。不过，机载表面等高线雷达（Surface Contour Radar）实验的初步结果\textsuperscript{[18]}表明该偏置可能处于均方根波高的 4\%--8\% 范围，目前更多测量正在进行之中\textsuperscript{[19]}。}。
+
+在以往工作中，海面高程密度函数 $q_{s}(t)$ 被假设为具有如下时域偏度高斯形式
+\[
+q_{s}(t) = \frac{1}{\sqrt{2\pi}\,\sigma_{s}}\left[1 + \frac{\lambda_{s}}{6}H_{3}(t/\sigma_{s})\right]\exp\left[-\tfrac{1}{2}\left(t/\sigma_{s}\right)^{2}\right]
+\tag{9}
+\]
+其中 $\sigma_{s}$ 为表面均方根波高，$\lambda_{s}$ 为偏度，$H_{3}$ 为厄米特（Hermite）多项式。Pierson 与 Mehr\textsuperscript{[9]}曾就雷达高度计分析讨论过这一形式；它是 Longuet-Higgins\textsuperscript{[10]}针对弱非线性随机变量给出的一般概率函数的低阶特例。本文所需的以 $z$ 为宗量的厄米特多项式为
+\[
+H_{3}(z) = z^{3} - 3z
+\tag{10}
+\]
+\[
+H_{4}(z) = z^{4} - 6z^{2} + 3
+\]
+和
+\[
+H_{6}(z) = z^{6} - 15z^{4} + 45z^{2} - 15.
+\]
+
+在海面高度分布为高斯分布的假设下，SWH 约为均方根波高的四倍，它与 $\sigma_{s}$ 的关系为
+\[
+\mathrm{SWH} = 4(c/2)\sigma_{s}
+\tag{11}
+\]
+其中 $c/2$ 用于把测距时间换算为表面高程。迄今绝大多数雷达高度计 SWH 测量都基于令 $\lambda_{s} = 0$ 所得的纯高斯形式，而 (9) 式则是尝试反演表面偏度时所用的高程密度函数\textsuperscript{[5]}。
+
+(9) 式是在一般 Gram--Charlier 级数\textsuperscript{[11]}中仅取前两项的结果。Huang 与 Long\textsuperscript{[12]}最近基于风生波浪场表面高程密度函数的实验室测量指出，(9) 式不足以描述表面高程密度，必须采用如下四项级数
+\[
+q_{s}(t) = \left[1 + \frac{\lambda_{s}}{6}H_{3}(t/\sigma_{s}) + \frac{\kappa_{s}}{24}H_{4}(t/\sigma_{s}) + \frac{\lambda_{s}^{2}}{72}H_{6}(t/\sigma_{s})\right]
+\times \frac{1}{\sqrt{2\pi}\,\sigma_{s}}\exp\left[-\tfrac{1}{2}\left(t/\sigma_{s}\right)^{2}\right],
+\tag{12}
+\]
+其中 $\kappa_{s}$ 为峰度，其余量的定义如前。本文随后导出的一般波形结果将基于 (12) 式，但 $\lambda_{s}^{2}$ 项将与 $\lambda_{s}$ 项分开保留，以便最终结果能方便地换回 (9) 式形式（而非 (12) 式）的表面高程密度（如有需要）。
+
+\subsection*{C. 雷达系统点目标响应的影响}
+
+雷达系统点目标响应 $s_{r}(t)$ 主要是发射雷达脉冲形状，但也包含接收机带宽的影响。我们将 $s_{r}(t)$ 取为近似高斯形，并采用与表面高程密度相同的如下一般形式：
+\[
+s_{r}(t) = \left[1 + \frac{\lambda_{r}}{6}H_{3}(t/\sigma_{r}) + \frac{\kappa_{r}}{24}H_{4}(t/\sigma_{r}) + \frac{\lambda_{r}^{2}}{72}H_{6}(t/\sigma_{r})\right]
+\times \frac{1}{\sqrt{2\pi}\,\sigma_{r}}\exp\left[-\tfrac{1}{2}\left(t/\sigma_{r}\right)^{2}\right].
+\tag{13}
+\]
+于是 (1) 式中的卷积 $q_{s}(t)*s_{r}(t)$ 可立即写为
+\[
+\begin{aligned}
+B(t) &= q_{s}(t)*s_{r}(t) \\
+&= \left[1 + \frac{\lambda}{6}H_{3}(t/\sigma) + \frac{\kappa}{24}H_{4}(t/\sigma) + \frac{\lambda^{2}}{72}H_{6}(t/\sigma)\right]
+\times \frac{1}{\sqrt{2\pi}\,\sigma}\exp\left[-\tfrac{1}{2}\left(t/\sigma\right)^{2}\right]
+\end{aligned}
+\tag{14}
+\]
+其中 $\sigma$、$\lambda$、$\kappa$（不带下标）为合成上升时间、合成偏度与合成峰度；容易证明这些合成量与贡献它们的表面高程量和点目标量之间有如下关系
+\[
+\sigma^{2} = \sigma_{s}^{2} + \sigma_{r}^{2},
+\tag{15}
+\]
+\[
+\lambda = \lambda_{s}(\sigma_{s}/\sigma)^{3} + \lambda_{r}(\sigma_{r}/\sigma)^{3},
+\tag{16}
+\]
+和
+\[
+\kappa = \kappa_{s}(\sigma_{s}/\sigma)^{4} + \kappa_{r}(\sigma_{r}/\sigma)^{4}.
+\tag{17}
+\]
+在实用雷达高度计中，波形采样波门由具有自身距离噪声（抖动）特性的距离跟踪器定位，因此跟踪抖动的概率密度函数必须作为附加项纳入平均回波波形的卷积描述。本文假设抖动相对其他各项可以忽略\footnote{通常，当抖动不可忽略时，可用具有自身 $\sigma_{j}$、$\lambda_{j}$、$\kappa_{j}$ 的近高斯形式描述；此时 (15)、(16)、(17) 式各自都将增加一项，其形式与已写出的两项相同。例如 (15) 式将变为 $\sigma^{2} = \sigma_{s}^{2} + \sigma_{r}^{2} + \sigma_{j}^{2}$。}。
+
+\subsection*{D. $W(t)$ 的展开与求解}
+
+波形 $W(t)$ 由 (2) 式的 $P_{FS}(t)$ 与 (14) 式的 $B(t)$ 作卷积给出：
+\[
+\begin{aligned}
+W(t) &= P_{FS}(t)*B(t) \\
+&= \int_{-\infty}^{\infty} P_{FS}(z)B(t-z)\,dz
+\end{aligned}
+\tag{18}
+\]
+但 $P_{FS}(t)$ 中贝塞尔函数 $I_{0}$ 的存在使 (18) 式难以直接积分。对本文所讨论的短脉冲雷达高度计感兴趣的波形区域，可将 $I_{0}$ 按小宗量级数\textsuperscript{[13]}展开：
+\[
+I_{0}(z) = \sum_{n=0}^{\infty}\left(z^{2}/4\right)^{n}\left(\frac{1}{n!}\right)^{2}
+\tag{19}
+\]
+从而可对 (18) 式逐项积分，得
+\[
+W(t) = \frac{A}{6}\exp\left[-d(\tau + d/2)\right]\sum_{n=0}^{\infty}\left(\frac{1}{n!}\right)^{2}\left(\frac{\beta^{2}\sigma}{4}\right)^{n} C_{n}(t)
+\tag{20}
+\]
+其中
+\[
+C_{n}(t) = C_{n0} + \kappa C_{n1} + \lambda^{2}C_{n2},
+\tag{21}
+\]
+\[
+C_{n0} = \frac{1}{\sqrt{2\pi}}\int_{-\infty}^{\tau}\left(\tau - z\right)^{n}\left[6 + \lambda H_{3}(z+d)\right]e^{-z^{2}/2}\,dz,
+\tag{22}
+\]
+\[
+C_{n1} = \frac{1}{\sqrt{2\pi}}\int_{-\infty}^{\tau}\left(\tau - z\right)^{n}\left[H_{4}(z+d)\right]e^{-z^{2}/2}\,dz,
+\tag{23}
+\]
+和
+\[
+C_{n2} = \frac{1}{\sqrt{2\pi}}\int_{-\infty}^{\tau}\left(\tau - z\right)^{n}\left[H_{6}(z+d)\right]e^{-z^{2}/2}\,dz
+\tag{24}
+\]
+且有
+\[
+\tau = \frac{t - t_{0}}{\sigma} - d
+\tag{25}
+\]
+和
+\[
+d = \delta\sigma.
+\tag{26}
+\]
+注意 (25) 式中写入了一个任意的时间原点平移 $t_{0}$；在从高度计数据恢复参数的模板拟合中，$t_{0}$ 是待调参数之一，因为在实用高度计中，距离跟踪器会使波形采样波门相对真实平均波形在（时间）位置上来回移动。
+
+对任意给定的 $n$ 完成 (22)、(23)、(24) 式所示的积分，结果可用 $G(\tau)$ 与 $P(\tau)$ 表出，其中 $G(\tau)$ 为高斯函数，$G(\tau) = (2\pi)^{-1/2}\exp(-\tau^{2}/2)$，$P(\tau)$ 为概率积分\footnote{文献中常用误差函数 $\mathrm{erf}(\tau)$ 代替 $P(\tau)$。二者的关系为 $\mathrm{erf}(\tau) = 2P(\tau\sqrt{2}) - 1$。利用文献[13]给出的级数展开，$P(\tau)$ 很容易在计算机上实现。}；随后定义两个新的时间函数 $D_{nm}$ 与 $E_{nm}$：
+\[
+C_{nm} = D_{nm}P(\tau) + E_{nm}G(\tau),\quad m = 0,\,1,\,2.
+\tag{27}
+\]
+这些 $D_{nm}$ 与 $E_{nm}$ 已对 $n = 0,\,1,\,2,\,3$ 求出，结果如下：
+\[
+\begin{aligned}
+D_{00} &= 6 + \lambda d^{3} \\
+E_{00} &= \lambda\left(1 - 3d^{2} - 3d\tau - \tau^{2}\right) \\
+D_{01} &= d^{4}/4 \\
+E_{01} &= \left(d - d^{3}\right) + \left(\tfrac{3}{4} - \tfrac{3}{4}d^{2}\right)\tau - d\tau^{2} - \frac{\tau^{3}}{4} \\
+D_{02} &= d^{6}/12 \\
+E_{02} &= \left(-\tfrac{3}{2}d + \tfrac{5}{3}d^{3} - \tfrac{1}{2}d^{5}\right) + \left(-\tfrac{5}{4} + \tfrac{15}{4}d^{2} - \tfrac{5}{4}d^{4}\right)\tau \\
+&\quad + \left(3d - \tfrac{5}{3}d^{3}\right)\tau^{2} + \left(\tfrac{5}{6} - \tfrac{5}{6}d^{2}\right)\tau^{3} - \frac{d}{4}\tau^{4} - \frac{\tau^{5}}{12}
+\end{aligned}
+\tag{28}
+\]
+
+\[
+\begin{aligned}
+D_{10} &= -3\lambda d^{2} + \left(6 + \lambda d^{3}\right)\tau \\
+E_{10} &= \left(6 + 3\lambda d + \lambda d^{3}\right) + \lambda\tau \\
+D_{11} &= -d^{3} + \frac{d^{4}}{4}\tau \\
+E_{11} &= \left(-\tfrac{1}{4} - 3d^{2} + \tfrac{d^{4}}{4}\right) + d\tau + \frac{\tau^{2}}{4} \\
+D_{12} &= -\frac{d^{5}}{2} + \frac{d^{6}}{12}\tau \\
+E_{12} &= \left(\tfrac{1}{4} - \tfrac{5}{2}d^{2} + \tfrac{5}{2}d^{4} + \tfrac{d^{6}}{12}\right) + \left(-\tfrac{3}{2}d + \tfrac{5}{3}d^{3}\right)\tau \\
+&\quad + \left(-\tfrac{1}{2} + \tfrac{5}{2}d^{2}\right)\tau^{2} + \tau^{3} + \frac{\tau^{4}}{12}
+\end{aligned}
+\tag{29}
+\]
+
+\[
+\begin{aligned}
+D_{20} &= \left(6 + 6\lambda d + \lambda d^{3}\right) - 6\lambda d^{2}\tau + \left(6 + \lambda d^{3}\right)\tau^{2} \\
+E_{20} &= \left(-2\lambda - 6\lambda d^{2}\right) + \left(6 + \lambda d^{3}\right)\tau \\
+D_{21} &= \left(3d^{2} + \tfrac{d^{4}}{4}\right) - 2d^{3}\tau + \tfrac{d^{4}}{4}\tau^{2} \\
+E_{21} &= \left(-2d - 2d^{3}\right) + \left(-1 + \tfrac{d^{4}}{2}\right)\tau \\
+D_{22} &= \left(\tfrac{5}{2}d^{2} + \tfrac{d^{6}}{12}\right) - d^{5}\tau + \tfrac{d^{6}}{12}\tau^{2} \\
+E_{22} &= \left(d - \tfrac{19}{3}d^{3} - d^{5}\right) + \left(\tfrac{1}{2} - \tfrac{5}{2}d^{2} + \tfrac{d^{6}}{12}\right)\tau - d^{2}\tau^{2} - \frac{\tau^{3}}{6}
+\end{aligned}
+\tag{30}
+\]
+
+\[
+\begin{aligned}
+D_{30} &= \left(-6\lambda - 9\lambda d^{2}\right) + \left(18 + 18\lambda d + 3\lambda d^{3}\right)\tau \\
+&\quad - 9\lambda d^{2}\tau^{2} + \left(6 + \lambda d^{3}\right)\tau^{3} \\
+E_{30} &= \left(12 + 18\lambda d + 2\lambda d^{3}\right) - 9\lambda d^{2}\tau + \left(6 + \lambda d^{3}\right)\tau^{2} \\
+D_{31} &= \left(-6d - 3d^{3}\right) + \left(9d^{2} + \tfrac{3}{4}d^{4}\right)\tau - 3d^{3}\tau^{2} + \frac{d^{4}}{4}\tau^{3} \\
+E_{31} &= \left(\tfrac{3}{2} + 9d^{2} + \tfrac{d^{4}}{4}\right) - 3d^{3}\tau + \tfrac{d^{4}}{4}\tau^{2} \\
+D_{32} &= \left(-10d^{3} - \tfrac{3}{2}d^{5}\right) + \left(\tfrac{15}{2}d^{2} + \tfrac{3}{4}d^{6}\right)\tau - \tfrac{3}{2}d^{4}\tau^{2} + \frac{d^{6}}{12}\tau^{3} \\
+E_{32} &= \left(-\tfrac{1}{2} + \tfrac{15}{2}d^{2} + 10d^{4} + \tfrac{d^{6}}{6}\right) + \left(3d - \tfrac{3}{2}d^{5}\right)\tau + \left(\tfrac{1}{2} + \tfrac{d^{6}}{12}\right)\tau^{2}.
+\end{aligned}
+\tag{31}
+\]
+
+\section{总结与算例}
+\seccontent
+简要回顾：波形由 (20) 式给出，所需项数是时间、指向角和天线波束宽度的函数。例如，对偏离天底角在 1° 以内的情形，单取一项即可在单个采样波门覆盖的时间范围内描述 GEOS-3 高度计波形；而波束宽度更小的 SEASAT-1，在天底角 1° 以内的采样波门范围内任意位置都需要 (20) 式的前三项。每个应用中所需项数的取舍，可通过比较逐阶更高阶项对总和的相对贡献来决定；下一段所讨论的图 1 与图 2 给出了理想化 SEASAT 高度计的算例。对每一项 $C_{n}(t)$，(21) 式用 $C_{n0}$、$C_{n1}$、$C_{n2}$ 表出 $C_{n}(t)$，而这三者又由 (27) 式给出，其中 (28)、(29)、(30)、(31) 式分别对应 $n = 0$、$1$、$2$、$3$。这一流程看起来繁琐，也确实假定使用计算机，但与原本必需的数值卷积流程相比，这些结果更易使用，所需计算机时也少得多。
+
+图 1--图 6 给出了由 (20) 式算出的平均回波波形算例：雷达高度计天线波束宽度 $\theta_{w} = 1.6^{\circ}$，位于海洋上空 $8\times10^{5}$ m 高度处，雷达系统点目标响应为纯高斯形，半高全宽 3.125 ns，即 $\sigma_{r} = 1.327$ ns，且 (14) 式中 $\lambda_{r} = \kappa_{r} = 0$。这些参数为 SEASAT-1 的标称值\textsuperscript{[14]}，这些图预测的是无限平均时间极限下的 SEASAT-1 实测平均回波波形\footnote{由于发射脉冲形状中存在非高斯旁瓣结构，实际的 SEASAT-1 平均回波波形会与本文插图有所不同。MacArthur\,[\,14, p.~4-50\,]描述了通过增大用于表示发射脉冲的高斯函数的有效宽度来处理这种旁瓣结构的尝试；但对实际 SEASAT-1 脉冲形状全部影响的讨论超出了本文范围。}。为研究该情形下波形展开应取多少项，定义
+\[
+\Delta_{k} = W_{k} - W_{k-1}
+\tag{32}
+\]
+其中 $W_{k}$ 为本文波形取前 $k$ 项的结果。例如 $W_{1}$ 是仅含 (20) 式第一项 $C_{0}(t)$ 的波形。在此记号下，$W_{0} = 0$，$\Delta_{1} = W_{1}$。图 1 与图 2 分别给出了偏离天底角 1.0° 和 0.5° 时的 $W_{4}$ 与 $\Delta_{1}$--$\Delta_{4}$。图 1 表明，在 SEASAT 最大采样波门跨度 100 ns 内，$\Delta_{4}$ 小于 $W_{4}$ 的百分之一；因此若百分之一可作为最大允许偏差，则 $W_{3}$ 已足以描述 SEASAT 波形。图 2 表明，当偏离天底角从 1.0° 降到 0.5° 时，这一一致性明显变好。
+
+\bodyfigure{width=0.9\textwidth,keepaspectratio}{figures/fig1.png}{图1 理想化 SEASAT 雷达高度计在 1.0° 偏离天底角下的平均回波波形：展示波形展开中逐项增加的效果}
+
+\bodyfigure{width=0.9\textwidth,keepaspectratio}{figures/fig2.png}{图2 理想化 SEASAT 雷达高度计在 0.5° 偏离天底角下的平均回波波形：展示波形展开中逐项增加的效果}
+
+图 3 与图 4 分别给出 SEASAT 波形随偏离天底角 $\xi$ 和随 SWH 变化的影响，图 5 给出表面偏度 $\lambda_{s}$ 非零的影响。图 1--图 5 绘制时，表面分布 (12) 式中均不含 $\lambda_{s}^{2}$ 项。图 6 对比了极端值 $\lambda_{s} = -1$（至少是真实海面可能出现的 $|\lambda_{s}|$ 的两倍）下计入与不计入 $\lambda_{s}^{2}$ 项的结果。即使在这种极端情形下，忽略 $\lambda_{s}^{2}$ 项与计入 $\lambda_{s}^{2}$ 项的结果仍吻合得相当好，且随 $|\lambda_{s}|$ 趋于零，吻合程度迅速提高。因此，对真实海洋上空的理想化 SEASAT 高度计，(12) 式中的 $\lambda_{s}^{2}$ 项可以忽略。
+
+\bodyfigure{width=0.9\textwidth,keepaspectratio}{figures/fig3.png}{图3 理想化 SEASAT 雷达高度计的平均回波波形：展示不同偏离天底角的影响}
+
+\bodyfigure{width=0.9\textwidth,keepaspectratio}{figures/fig4.png}{图4 理想化 SEASAT 雷达高度计的平均回波波形：展示不同海洋有效波高的影响}
+
+\bodyfigure{width=0.9\textwidth,keepaspectratio}{figures/fig5.png}{图5 理想化 SEASAT 雷达高度计的平均回波波形：展示表面高程概率密度函数中偏度的影响}
+
+\bodyfigure{width=0.9\textwidth,keepaspectratio}{figures/fig6.png}{图6 理想化 SEASAT 雷达高度计的平均回波波形：展示表面高程概率密度函数中计入偏度平方项的影响}
+
+\subsection*{作者简介}
+\seccontent
+George S. Hayne（IEEE 会员）1937 年 5 月 5 日生于密歇根州安阿伯，1958 年获卡拉马祖学院物理学学士（B.A.）学位，1960 年和 1966 年分别获耶鲁大学物理学硕士（M.S.）和博士（Ph.D.）学位。1965--1969 年任杜克大学物理系研究人员，1969--1973 年就职于北卡罗来纳州三角研究园的三角研究院。1973 年起任职于北卡罗来纳州 Apex 的应用科学联合公司（Applied Science Associates）。其当前技术兴趣为遥感的一般领域，尤其是雷达高度测量及其相关处理。他是 Sigma Xi 会员和美国科学促进会会员。
+
+\clearpage
+\section*{参考文献}
+
+{\wuhao
+\setlength{\parindent}{0pt}
+\noindent[1] G. S. Brown, ``The average impulse response of a rough surface and its applications,'' IEEE Trans. Antennas Propagat., vol. AP-25, pp. 67-74, Jan. 1977; also in IEEE Trans. Oceanic Eng., vol. OE-2, pp. 67-74, Jan. 1977.\par
+\noindent[2] C. L. Rufenach and W. R. Alpers, ``Measurement of ocean wave heights using the GEOS-3 altimeter,'' J. Geophys. Res., vol. 83, pp. 5011-5018, Oct. 1978.\par
+\noindent[3] N. Mognard and B. Lago, ``The computation of wind speed and wave heights from GEOS-3 data,'' J. Geophys. Res., vol. 84, pp. 3979-3986, July 1979.\par
+\noindent[4] L. S. Fedor, \emph{et al.}, ``Satellite altimeter measurements of sea state---An algorithm comparison,'' J. Geophys. Res., vol. 84, pp. 3991-4001, July 1979.\par
+\noindent[5] E. J. Walsh, ``Extraction of ocean waveheight and dominant wavelength from GEOS-3 altimeter data,'' J. Geophys. Res., vol. 84, pp. 4003-4010, July 1979.\par
+\noindent[6] C. L. Parsons, ``GEOS-3 waveheight measurements: An assessment during high sea state conditions in the North Atlantic,'' J. Geophys. Res., vol. 84, pp. 4011-4020, July 1979.\par
+\noindent[7] L. S. Fedor and D. E. Barrick, ``Measurement of ocean waveheights with a satellite radar altimeter,'' EOS Trans. AGU, vol. 59, pp. 843-846, Sept. 1978.\par
+\noindent[8] R. W. Priester and L. S. Miller, ``Estimation of significant wave height and wave height density function using satellite altimeter data,'' J. Geophys. Res., vol. 84, pp. 4021-4026, July 1979.\par
+\noindent[9] W. J. Pierson, Jr., and E. Mehr, ``Average return pulse form and bias for the S193 radar altimeter on Skylab as a function of wave conditions,'' in \emph{The Use of Artificial Satellites for Geodesy}, S. W. Henrickson \emph{et al.}, Eds., Geophysical Monograph Series, Vol. 15. Washington, DC: American Geophysical Union, 1972, pp. 217-226.\par
+\noindent[10] M. S. Longuet-Higgins, ``The effect of nonlinearities on statistical distributions in the theory of sea waves,'' J. Fluid Mechanics, vol. 17, part 3, pp. 459-480, 1963.\par
+\noindent[11] M. G. Kendall and A. Stuart, \emph{The Advanced Theory of Statistics. Volume I: Distribution Theory}, 2nd ed. London: Charles Griffin \& Co., Ltd., 1963, sections 6.17-6.22.\par
+\noindent[12] N. E. Huang and S. R. Long, ``A study of the surface elevation probability distribution function and statistics of wind generated waves,'' J. Fluid Mechanics, to be published.\par
+\noindent[13] M. Abramowitz and I. A. Stegun, Eds., \emph{NBS Handbook of Mathematical Functions}. New York: Dover, 1972.\par
+\noindent[14] J. L. MacArthur, ``SEASAT-A radar altimeter design description,'' Applied Physics Lab., Laurel, MD, SDO-5232, Nov. 1978.\par
+\noindent[15] B. S. Yaplee, A. Shapiro, D. L. Hammond, B. D. Au, and E. A. Uliana, ``Nanosecond radar observations of the ocean surface from a stable platform,'' IEEE Trans. Geosci. Electron., vol. GE-9, pp. 170-174, July 1971.\par
+\noindent[16] A. Shapiro, E. A. Uliana, and B. S. Yaplee, ``Radar pulse shape versus ocean waveheight,'' in \emph{Sea Surface Topography from Space}, J. R. Apel, Ed., U.S. Dep. of Commerce, Washington, DC, NOAA Tech. Rep. ERL-AOML 7, 1972.\par
+\noindent[17] F. C. Jackson, ``The reflection of impulses from a nonlinear random sea,'' J. Geophys. Res., vol. 84, pp. 4939-4943, Aug. 1979.\par
+\noindent[18] E. J. Walsh and J. E. Kenney, ``Determination of the electromagnetic bias at nadir for 36 GHz using the surface contour radar,'' presented at URSI Nat. Radio Science Meeting, Boulder, CO, Nov. 6-9, 1978.\par
+\noindent[19] E. J. Walsh, private communication.\par
+}

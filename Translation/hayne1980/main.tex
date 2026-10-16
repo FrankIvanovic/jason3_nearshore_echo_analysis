@@ -1,0 +1,262 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[top=2.54cm, bottom=2.54cm, left=3.18cm, right=3.18cm]{geometry}
+\geometry{headsep=1em,footskip=2em}
+\geometry{headheight=18pt}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage[normalem]{ulem}
+\usepackage{setspace}
+\usepackage{ctex}
+\usepackage{xeCJK}
+\usepackage{fontspec}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{titletoc}
+\usepackage{caption}
+\usepackage{hyperref}
+\usepackage{etoolbox}
+\usepackage{pdfpages}
+
+\setstretch{1.5}
+\AtBeginDocument{
+    \setlength{\abovedisplayskip}{0pt}
+    \setlength{\belowdisplayskip}{2.5mm}
+    \setlength{\abovedisplayshortskip}{0pt}
+    \setlength{\belowdisplayshortskip}{2.5mm}
+}
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\setlength{\abovecaptionskip}{15pt}
+\setlength{\jot}{6pt}
+\allowdisplaybreaks
+
+\setCJKmainfont{SimSun}[AutoFakeBold=2.5]
+\setCJKsansfont{SimSun}[AutoFakeBold=2.5]
+\setCJKmonofont{SimSun}[AutoFakeBold=2.5]
+\setCJKfamilyfont{song}{SimSun}
+\newcommand{\song}{\CJKfamily{song}}
+\setCJKfamilyfont{kai}{KaiTi}
+\newcommand{\kai}{\CJKfamily{kai}}
+\setCJKfamilyfont{hwzs}{STZhongsong}[AutoFakeBold=2.5]
+\newcommand{\hwzs}{\CJKfamily{hwzs}}
+\setCJKfamilyfont{dengxian}{DengXian}
+\newcommand{\dengxian}{\CJKfamily{dengxian}}
+\setCJKfamilyfont{hei}{SimHei}
+\newcommand{\hei}{\CJKfamily{hei}}
+
+\setmainfont{Times New Roman}[Ligatures=TeX]
+\setsansfont{Times New Roman}
+\setmonofont{Times New Roman}
+\newfontfamily\zhongsongdigits{STZhongsong}
+
+\definecolor{MSBlue}{rgb}{.204,.353,.541}
+\definecolor{MSLightBlue}{rgb}{.31,.506,.741}
+\definecolor{coverTextBlue}{RGB}{15,71,97}
+
+\newcommand{\erhao}{\fontsize{22pt}{28pt}\selectfont}
+\newcommand{\xiaoerhao}{\fontsize{18pt}{24pt}\selectfont}
+\newcommand{\sanhao}{\fontsize{16pt}{22pt}\selectfont}
+\newcommand{\xiaosanhao}{\fontsize{15pt}{22pt}\selectfont}
+\newcommand{\sihao}{\fontsize{14pt}{18pt}\selectfont}
+\newcommand{\xiaosihao}{\fontsize{12pt}{18pt}\selectfont}
+\newcommand{\wuhao}{\fontsize{10.5pt}{18pt}\selectfont}
+
+\graphicspath{{./}{figures/}}
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\newcommand{\headstyle}{
+    \fancyhead[C]{\hwzs\wuhao 华中科技大学本科生毕业设计（论文）参考文献译文}
+}
+\newcommand{\footstyle}{%
+    \fancyfoot[C]{\normalfont \thepage}
+    \fancyfoot[L]{\rule[5pt]{6.7cm}{0.4pt}}
+    \fancyfoot[R]{\rule[5pt]{6.7cm}{0.4pt}}
+}
+\pagestyle{fancy}
+\fancyhf{}
+\headstyle
+\footstyle
+\fancypagestyle{main}{%
+    \fancyhf{}
+    \headstyle
+    \footstyle
+}
+
+\renewcommand{\thesection}{\chinese{section}}
+\titleformat{\section}{\wuhao\hei\bfseries}{\thesection、}{0.5em}{}
+\titlespacing{\section}{0pt}{0pt}{0pt}
+\titleformat{name=\section,numberless}{\centering\xiaosihao\hei\bfseries}{}{0em}{}
+\titleformat*{\subsection}{\wuhao\hei\bfseries}
+\titleformat*{\subsubsection}{\wuhao\bfseries}
+\titlespacing{\subsection}{0pt}{0pt}{0pt}
+\titlespacing{\subsubsection}{0pt}{0pt}{0pt}
+\newcommand{\sectionbreak}{}
+
+\newcommand\seccontent{%
+    \wuhao
+    \setlength{\parindent}{2em}
+    \setlength{\parskip}{0pt}
+}
+
+\newcommand{\bodyfigcaption}[1]{%
+    {\centering\wuhao\hei #1\par}
+}
+
+\newcommand{\bodyfigure}[3]{%
+    \par\medskip
+    \noindent\begin{minipage}{\textwidth}
+        \centering
+        \includegraphics[#1]{#2}\par
+        \bodyfigcaption{#3}
+    \end{minipage}\par
+    \medskip
+}
+
+\captionsetup[figure]{labelformat=default, labelsep=quad, name={图}}
+\captionsetup[table]{labelformat=default, labelsep=quad, name={表}}
+\renewcommand{\thefigure}{\thesection--\arabic{figure}}
+\renewcommand{\thetable}{\thesection--\arabic{table}}
+\captionsetup[figure]{labelfont=normalfont, textfont=normalfont}
+\captionsetup[table]{labelfont=normalfont, textfont=normalfont}
+\newcommand{\reffig}[1]{图 \ref{#1}}
+\newcommand{\reftab}[1]{表 \ref{#1}}
+\renewcommand\theequation{\arabic{equation}}
+
+\renewcommand\contentsname{目录}
+\renewcommand\listfigurename{插图目录}
+\renewcommand\listtablename{表格目录}
+
+\hypersetup{
+    bookmarks=true,
+    colorlinks=true,
+    linkcolor=black,
+    citecolor=black,
+    urlcolor=purple
+}
+
+\begin{document}
+
+\pagestyle{empty}
+\thispagestyle{empty}
+\begin{center}
+    \vspace*{1cm}
+    \includegraphics[height=1.4cm]{figures/HUST.png}
+
+    \vspace{1.5cm}
+    {\xiaoerhao\hwzs \textcolor{coverTextBlue}{本科毕业设计（论文）参考文献译文本}}
+
+    \vspace{2.0cm}
+    {\xiaosanhao\hwzs
+        译文出处：{\fontspec{Times New Roman}[Ligatures=TeX]G. S. Hayne, ``Radar altimeter mean return waveforms from near-normal-incidence ocean surface scattering,'' IEEE Trans. Antennas Propag., vol. AP-28, no. 5, pp. 687--692, Sep. 1980.}
+
+        \vspace{1.5cm}
+        {\sanhao\hwzs
+            \renewcommand{\arraystretch}{1.4}
+            \begin{tabular}{@{}l@{\hspace{2em}}l@{}}
+                \makebox[5em][s]{院 系} & \underline{\makebox[14em][c]{电子信息与通信学院}} \\
+                \makebox[5em][s]{专 业 班 级} & \underline{\makebox[14em][c]{电信2203班}} \\
+                \makebox[5em][s]{姓 名} & \underline{\makebox[14em][c]{蒲奕帆}} \\
+                \makebox[5em][s]{学 号} & \underline{\makebox[14em][c]{U202213789}} \\
+                \makebox[5em][s]{指 导 教 师} & \underline{\makebox[14em][c]{田加胜}} \\
+            \end{tabular}
+        }
+
+        \vspace{2.5cm}
+        {\sanhao\hwzs {\zhongsongdigits 2026}年~~{\zhongsongdigits 10}~~月~~{\zhongsongdigits 17}~~日}
+    }
+\end{center}
+
+\clearpage
+
+\thispagestyle{empty}
+{\centering
+    {\sanhao\hwzs\bfseries \fontsize{16pt}{25pt}\selectfont 译文要求\par}
+}
+
+\vspace{-0.25cm}
+{\sihao
+\fontsize{14pt}{0.7cm}\selectfont
+
+\begin{list}{}{
+  \setlength{\leftmargin}{1.1cm}
+  \setlength{\labelwidth}{1.1cm}
+  \setlength{\labelsep}{0pt}
+  \setlength{\itemindent}{0pt}
+  \setlength{\listparindent}{0pt}
+  \setlength{\parsep}{0pt}
+  \setlength{\itemsep}{0pt}
+  \setlength{\topsep}{0pt}
+  \renewcommand{\makelabel}[1]{\hfill #1}
+}
+
+\item[一、] 译文内容须与课题（或专业内容）联系，并需在封面注明详细出处。
+\item[二、] 出处格式为：
+\item[] 图书：作者.书名.版本（第$\times$版）.译者.出版地：出版者，出版年.起页$\sim$止页
+\item[] 期刊：作者.文章名称.期刊名称，年号，卷号（期号）：起页$\sim$止页
+\item[三、] 译文不少于5000汉字（或2万印刷符）。
+\item[四、] 翻译内容用五号宋体字编辑，采用A4号纸双面打印，封面与封底采用浅蓝色封面纸（卡纸）打印。要求内容明确，语句通顺。
+\item[五、] 译文及其相应参考文献一起装订，顺序依次为封面、译文、文献。
+\item[六、] 翻译应在第七学期完成。
+
+\end{list}
+}
+
+\vspace{-5.25mm}
+
+\begingroup
+\setlength{\parskip}{0pt}
+\setlength{\baselineskip}{25pt}
+{\centering
+    {\sanhao\hwzs\bfseries \fontsize{16pt}{25pt}\selectfont 译文评阅\par}
+}
+\vspace{2mm}
+\nointerlineskip
+\noindent\makebox[\textwidth]{\rule{\textwidth}{0.5pt}}\par
+{\sihao\bfseries 导师评语\par}
+\endgroup
+
+{\sihao
+\fontsize{14pt}{0.7cm}\selectfont
+\setlength{\parindent}{0pt}
+应根据学校“译文要求”，对学生译文翻译的准确性、翻译数量以及译文的文字表述情况等做具体的评价后，再评分。
+}
+
+\vspace{4.6cm}
+
+{\wuhao
+评分：\underline{\hspace{2cm}}（百分制）\hfill 指导教师（签名）：\underline{\hspace{3cm}}
+}
+
+\vspace{1mm}
+{\sihao\raggedleft 年\qquad 月\qquad 日\par}
+
+\clearpage
+
+\setcounter{page}{1}
+\pagestyle{fancy}
+\input{body_hayne1980.tex}
+
+\clearpage
+\thispagestyle{empty}
+\pagestyle{empty}
+\null
+\vfill
+\begin{center}
+    {\sanhao\hwzs\bfseries 参考文献原文\par}
+\end{center}
+\vfill
+\null
+
+\includepdf[pages=1-6,pagecommand={},fitpaper=true]{Radar_altimeter_mean_return_waveforms_from_near-normal-incidence_ocean_surface_scattering.pdf}
+
+\end{document}
