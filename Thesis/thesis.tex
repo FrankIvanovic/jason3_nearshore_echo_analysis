@@ -142,7 +142,7 @@
 
 \usepackage{graphicx}
 % 图源路径：直接引用三个代码模块的成品图
-\graphicspath{{./}{../Echo_Simulation/output/}{../Retracking/output/}}
+\graphicspath{{./}{../Echo_Simulation/output/}{../Retracking/output/}{../Data_Reading/output/}}
 \usepackage{booktabs}
 \usepackage{tabularx}
 \usepackage{makecell}
@@ -411,28 +411,145 @@
 \section{卫星雷达高度计海洋回波测量原理}
 \label{chap:principle}
 
+本章给出论文涉及的高度计测量与海面回波物理基础。第 \ref{sec:altimeter-principle} 节介绍测距原理与脉冲有限工作体制；第 \ref{sec:brown-hayne} 节给出开阔海平均回波的 Brown 模型及其 Hayne 二阶展开，建立波形参数与海洋参数的对应关系；第 \ref{sec:scatter} 节给出海面散射的几何光学模型；第 \ref{sec:dielectric} 节给出海水介电常数与菲涅尔反射率模型；第 \ref{sec:coastal-specific} 节分析近海回波的特殊性，引出本文的研究动机。
+
 \subsection{高度计测距与脉冲有限工作体制}
 \label{sec:altimeter-principle}
-\hongzifuzhu{写什么：测高基本几何（卫星到海面距离+轨道→SSH）；脉冲有限（pulse-limited）体制足印随时间扩大的过程；Jason-3 关键系统参数（ Ku 波段 13.575 GHz、轨道高度 1336 km、带宽 320 MHz、104 距离门×3.125 ns）。}
-\hongzifuzhu{建议配图：测高几何示意图、脉冲有限足印示意图（需新画，Visio/TikZ）。}
 
-\subsection{海面电磁散射与回波功率}
-\label{sec:scatter}
-\hongzifuzhu{写什么：几何光学（GO）近似下准镜面散射，Cox-Munk 斜率概率密度与 $\sigma^0$ 随风速的关系；雷达方程作用于扩散足印内各面元。公式：本文式(4.5)-(4.10) 对应的散射理论。}
+卫星雷达高度计的基本观测量是雷达天线相位中心到海面的往返时延。以精密轨道测定给出的卫星椭球高 $h_{\mathrm{orb}}$ 为基准，扣除各项传播与地球物理修正后，得到海面高度
+\begin{equation}
+	h_{\mathrm{SSH}} = h_{\mathrm{orb}} - R - \sum_i \Delta h_i
+	\label{eq:ssh}
+\end{equation}
+式中 $R = c\, \Delta t / 2$ 为测得的斜距（$\Delta t$ 为往返时延），$\Delta h_i$ 包括电离层延迟、干/湿对流层延迟、海况偏差、潮汐与大气压改正等\cite{chelton2001}。时延测量精度直接决定海面高度精度：距离每差 1 cm 对应时延约 67 ps，因此波形前沿位置的精确定位（重跟踪，见第 \ref{chap:retracking} 章）是测高数据处理的核心环节。
 
-\subsection{Brown 平均回波模型与 Hayne 二阶模型}
+按足印形成机制，雷达高度计分为波束有限与脉冲有限两类。发射脉冲经脉冲压缩后的宽度为 $\tau_p = 1/B$（本文 $B = 320$ MHz，$\tau_p = 3.125$ ns），对应距离分辨率 $c\, \tau_p / 2 = 0.469$ m。脉冲抵达海面后，照明区自天底点随时间向外扩张为圆环，时刻 $t$（相对平均海面双程延迟）的照明环半径可由 $R = \sqrt{H^{2} + r^{2}}$ 的小角展开得到：
+\begin{equation}
+	r(t) \approx \sqrt{c\, t\, H}
+	\label{eq:ring}
+\end{equation}
+当脉冲受限足印远小于波束足印，即 $\sqrt{H c\, \tau_p} \ll H \tan\theta_b$（$\theta_b$ 为半波束宽度）时，回波能量由脉冲受限环主导，称为脉冲有限（pulse-limited）体制。以 Jason-3 为例（$H = 1336$ km，$\theta_b = 1.1^\circ$）：脉冲受限初始足印半径 $\sqrt{H c\, \tau_p} \approx 1.1$ km，远小于 3 dB 波束足印半径 $H \tan\theta_b \approx 25.7$ km，属于典型的脉冲有限体制；其 Ku 波段（13.575 GHz）波形按 104 个距离门、门间隔 3.125 ns 采样，采样窗覆盖环半径从天底扩张至约 10 km 的过程（系统参数详见\reftab{tab:params}）。
+
+\hongzifuzhu{TODO：此处建议补一幅测高几何与脉冲有限足印扩张示意图（卫星—海面几何 + 不同时刻照明环），Visio/TikZ 画。}
+
+天线方向图采用高斯功率模型
+\begin{equation}
+	G(\theta) = \exp\!\left( -\frac{\theta^{2}}{2 \sigma_\theta^{2}} \right)
+	\label{eq:gain}
+\end{equation}
+式中 $\sigma_\theta$ 由半功率角确定：$\theta$ 等于半波束宽度 $1.1^\circ$ 时 $G$ 降至 $1/2$，解得 $\sigma_\theta = 0.934^\circ$。
+
+脉冲有限体制的平均回波呈现稳定的三段结构：波形起始的热噪声区（接收机噪声本底）、陡峭的上升沿（脉冲受限环扫过天底足印的过程）与缓变的下降沿/平台（环向波束边缘扩张，受天线方向图与后向散射调制）。三个波形参数与海洋参数一一对应：上升沿中点时延 $t_0$ 给出海面高度（SSH）；上升沿宽度由波高分布决定，给出有效波高（SWH）；平台功率由天底后向散射系数 $\sigma^0$ 决定，给出海面风速。这一对应关系是海洋模式波形重跟踪算法的物理基础，也是本文误差分析的出发点，其定量形式由 2.2 节的平均回波模型给出。
+
+\subsection{海面回波的 Brown 平均模型与 Hayne 二阶展开}
 \label{sec:brown-hayne}
-\hongzifuzhu{写什么：Brown 三重卷积模型（平坦海面冲激响应 $\ast$ 波高概率密度 $\ast$ 点目标响应）各项物理含义与波形三段结构（热噪声区/上升沿/平顶）；Hayne 二阶模型解析式及误指向角 ξ 项；波形关键参数（amplitude、半功率点 $t_0$、前沿斜率→$\sigma_h$）与海洋参数的对应。}
-\hongzifuzhu{可复用 Echo\_Simulation/output/echo\_wind\_family.png 作为波形结构示意（或据此重绘标注版）。}
+
+Brown\cite{brown1977} 将脉冲有限高度计对统计均匀海面的平均回波表示为三个物理因子的卷积：
+\begin{equation}
+	W(t) = P_{\mathrm{FS}}(t) \ast q_s(t) \ast S_r(t)
+	\label{eq:brown}
+\end{equation}
+式中 $P_{\mathrm{FS}}$ 为平坦海面冲激响应，$q_s$ 为海面波高概率密度函数，$S_r$ 为雷达理想点目标响应（$\mathrm{sinc}^2$ 形式，其离散实现见 \ref{sec:facetsim} 节式 \eqref{eq:ptr}）。
+
+平坦海面冲激响应：在天底指向、双程功率方向图 $G^{2}(\theta) = \exp(-\theta^{2} / \sigma_\theta^{2})$（与式 \eqref{eq:gain} 同口径）下，时刻 $t$ 的照明环满足 $\theta^{2} \approx c\, t / H$，方向图对环功率的压制给出指数衰减形式
+\begin{equation}
+	P_{\mathrm{FS}}(t) = P_0 \exp(-\delta\, t)\, u(t), \qquad \delta = \frac{c}{H \sigma_\theta^{2}}
+	\label{eq:pfs}
+\end{equation}
+式中 $u(t)$ 为单位阶跃函数（$t < 0$ 无回波）。上升沿源于脉冲受限环自天底点的扩张，下降沿的缓慢衰减源于照明环向波束边缘移动时方向图增益的下降。
+
+波高概率密度：海面高度服从均值为零的高斯分布时，
+\begin{equation}
+	q_s(t) = \frac{1}{\sqrt{2 \pi}\, \sigma_\tau} \exp\!\left( -\frac{t^{2}}{2 \sigma_\tau^{2}} \right), \qquad \sigma_\tau = \frac{2 \sigma_h}{c}
+	\label{eq:qs}
+\end{equation}
+式中 $\sigma_h$ 为海面均方根高度，有效波高 $\mathrm{SWH} = 4 \sigma_h$。真实风浪的波高分布相对高斯存在轻微不对称（非线性波—波相互作用），可在 $q_s$ 中引入偏度参数 $\lambda_s$ 予以修正。
+
+Hayne\cite{hayne1980}对式 \eqref{eq:brown} 作二阶近似解析展开（本文实现对应文献\cite{refpaper}式(5.7)--(5.15)），将平均回波写成
+\begin{equation}
+	W(t) = 2 W_1(t) - W_2(t), \qquad W_i(t) = A\, E_\xi \exp\!\left[ -D_i \left( U_i + D_i / 2 \right) \right] \Phi(U_i)
+	\label{eq:hayne}
+\end{equation}
+式中 $\Phi$ 为标准正态分布函数，各参数为
+\begin{equation}
+\begin{aligned}
+	&\sigma_c = \sqrt{\sigma_p^{2} + \sigma_s^{2}}, \quad &&\sigma_p = \frac{0.513}{B}, \quad &&\sigma_s = \frac{2 \sigma_h}{c}, \\
+	&\delta = \frac{4}{\gamma} \frac{c}{H} \cos 2 \xi, \quad &&\beta = \frac{4}{\gamma} \sqrt{\frac{c}{H}} \sin 2 \xi, \quad &&\gamma = 4 \sigma_\theta^{2}, \\
+	&\alpha_1 = \delta - \frac{\beta^{2}}{8}, \quad &&\alpha_2 = \delta, \quad &&E_\xi = \exp\!\left( -\frac{4 \sin^{2} \xi}{\gamma} \right), \\
+	&D_i = \alpha_i \sigma_c, \quad &&U_i = \frac{t - t_0}{\sigma_c} - D_i . &&
+\end{aligned}
+\label{eq:hayneparams}
+\end{equation}
+式中 $A$ 为回波幅度，$t_0$ 为前缘中点（半功率点）时延，$\xi$ 为天线误指向角，$\sigma_p$ 为点目标响应的高斯等效宽度（$\mathrm{sinc}^2$ 的最优高斯逼近），$\sigma_s$ 为波高展宽项，$\sigma_c$ 为二者合成的波形宽度参数；天线宽度参数按本文双程方向图口径取 $\gamma = 4 \sigma_\theta^{2}$。当 $\xi = 0$、$\lambda_s = 0$ 时，式 \eqref{eq:hayne} 退化为一阶形式，其前沿主项即
+\begin{equation}
+	W(t) \approx \frac{A}{2} \left[ 1 + \mathrm{erf} \!\left( \frac{t - t_0}{\sqrt{2}\, \sigma_c} \right) \right]
+	\label{eq:erf}
+\end{equation}
+远尾则保留式 \eqref{eq:hayne} 的指数衰减结构。误指向角通过 $E_\xi$ 压低回波幅度、通过 $\beta$ 使前沿形状不对称，是波形拟合中与幅度、宽度强耦合的参数（其可辨识性问题在 \ref{sec:brownfit} 节讨论）。
+
+由上述模型，波形参数与海洋参数的定量对应为
+\begin{itemize}
+	\item \textbf{海面高度（SSH）}：前缘中点 $t_0$ 相对参考时延的偏移即距离修正量，$\Delta h = c\, t_0 / 2$；
+	\item \textbf{有效波高（SWH）}：由拟合波形宽度扣除系统展宽，$\mathrm{SWH} = 2 c \sqrt{\sigma_c^{2} - \sigma_p^{2}} = 4 \sigma_h$；
+	\item \textbf{海面风速（$U$）}：平台功率正比于天底后向散射 $\sigma^0(0)$（式 \eqref{eq:sigma0}），经 Cox--Munk 正演关系反演风速（见 \ref{sec:wind} 节）。
+\end{itemize}
+这三条对应关系分别构成第 \ref{chap:retracking} 章三类反演器（阈值法、Brown/Hayne 波形拟合、$\sigma^0$ 风速反演）的物理依据。
+
+\subsection{海面散射的几何光学模型}
+\label{sec:scatter}
+
+高度计 Ku 波段波长（2.21 cm）远小于主导海面重力波的波长，海面在天线照明区内满足 Kirchhoff 近似的适用条件（面元曲率半径远大于波长），天底附近的后向散射为准镜面反射，用几何光学（GO）近似描述为
+\begin{equation}
+	\sigma^0(\theta, \phi) = \frac{\rho\, \pi}{\cos^{4} \theta}\, p\!\left( \tan\theta, 0 \right)
+	\label{eq:sigma0}
+\end{equation}
+式中 $\rho$ 为海水法向菲涅尔反射率（见 \ref{sec:dielectric} 节），$p$ 为海面坡度概率密度函数在雷达视线方向上的取值。计入风向各向异性时，采用 Cox--Munk 斜率概率密度\cite{coxmunk1954}：
+\begin{equation}
+	p = \frac{1}{2 \pi s_u s_c} \exp\!\left( -\frac{\tan^{2} \theta}{v} \right), \qquad \frac{1}{v} = \frac{1}{2} \left( \frac{\cos^{2}(\phi - \phi_v)}{s_u^{2}} + \frac{\sin^{2}(\phi - \phi_v)}{s_c^{2}} \right)
+	\label{eq:vdef}
+\end{equation}
+式中 $\phi$ 为面元方位角，$\phi_v$ 为风向；$s_u^{2}$、$s_c^{2}$ 分别为顺风向与交叉风向的斜率方差，随风速线性变化（对应文献\cite{refpaper}式(4.9)、(4.10)）：
+\begin{equation}
+	s_u^{2} = 0.00078545\, U_{19.5} + 0.0092407, \qquad s_c^{2} = 0.00052799\, U_{19.5} + 0.0097295
+	\label{eq:slopevar}
+\end{equation}
+为避免与式 \eqref{eq:hayneparams} 中 Hayne 模型的合成波形宽度 $\sigma_c$ 混淆，本文以 $s_u^{2}$、$s_c^{2}$ 记海面斜率方差。由式 \eqref{eq:sigma0}--\eqref{eq:slopevar}，天底后向散射 $\sigma^0(0) = \rho / (2 s_u s_c)$ 随风速增大而单调下降——这正是高度计风速遥感的物理基础；三档仿真海况的具体数值见 \ref{sec:pm-surface} 节\reftab{tab:seastates}。
 
 \subsection{海水介电常数与菲涅尔反射率}
 \label{sec:dielectric}
-\hongzifuzhu{写什么：Debye 介电模型（盐度/温度→复介电常数→垂直入射菲涅尔反射率 ρ）；给出 Ku 波段锚点 ε=(47.08, 39.07)、ρ=0.6173；说明回波平台功率与 ρ 的关系。}
+
+海水相对介电常数 $\varepsilon(S, T, f)$ 依赖盐度 $S$（‰）、温度 $T$（$^\circ$C）与频率 $f$，采用 Debye 弛豫模型（Klein--Swift 型经验参数化\cite{refpaper}）：
+\begin{equation}
+	\varepsilon(S, T, f) = \varepsilon_\infty + \frac{\varepsilon_1(S, T) - \varepsilon_\infty}{1 + (2 \pi f \tau)^{2}} + \mathrm{j} \left[ \frac{2 \pi f \tau\, \left( \varepsilon_1(S, T) - \varepsilon_\infty \right)}{1 + (2 \pi f \tau)^{2}} + \frac{\sigma_i(S, T)}{2 \pi f \varepsilon_0} \right]
+	\label{eq:debye}
+\end{equation}
+式中 $\varepsilon_\infty = 4.9$ 为高频极限介电常数，静态介电常数 $\varepsilon_1$、弛豫时间 $\tau$ 与离子电导率 $\sigma_i$ 均为 $(S, T)$ 的经验多项式（具体表达式见文献\cite{refpaper}式(2.21)--(2.23)），$\varepsilon_0$ 为真空介电常数。垂直入射的菲涅尔反射率为
+\begin{equation}
+	\rho = \left| \frac{1 - \sqrt{\varepsilon}}{1 + \sqrt{\varepsilon}} \right|^{2}
+	\label{eq:fresnel}
+\end{equation}
+在本文锚点（13.575 GHz、20 $^\circ$C、35‰）模型给出 $\varepsilon \approx (47.1,\ 39.1)$，对应 $\rho = 0.6173$。微波频段海水的电磁损耗由极性分子的 Debye 弛豫与离子电导共同主导：盐度仅通过电导率线性项间接进入、影响微弱，而温度显著改变弛豫时间——这一不对称性是 \ref{sec:coastal-sim} 节敏感性分析中“盐度可忽略、温度需修正”结论的物理根源。由式 \eqref{eq:sigma0}，$\rho$ 对 $\sigma^0$ 为纯幅度缩放，因此介电常数只平移回波平台、不改变波形形状。
 
 \subsection{近海回波的特殊性}
 \label{sec:coastal-specific}
-\hongzifuzhu{写什么：近海波形污染的三种典型机制——足印部分触陆（陆地带回波叠加）、浅水海况与开阔海差异、地形（滩涂/礁石/岛屿）造成的提前回波；由此引出“标准重跟踪在近海失效”的问题。}
-\hongzifuzhu{建议配图：可用 Jason-3 c603p147 近海实测波形堆叠图作直观例子（Data\_Reading 的 nearshore\_stack 成品图，或 Retracking fig5）。}
+
+开阔海条件下，高度计足印内为统计均匀的海面，平均回波服从 2.2 节的 Brown 模型，波形参数到海洋参数的映射成立。近海区域这一前提被破坏，波形污染主要来自三种机制：
+\begin{enumerate}
+	\item \textbf{足印部分触陆}：脉冲受限足印自天底的约 1.1 km 随波形时间扩张至 10 km 量级（式 \eqref{eq:ring}），轨迹接近海岸线时照明区内混入陆地回波。陆地散射强度取决于其介电特性与表面粗糙度，可以强于或弱于海面，叠加后波形前沿与尾窗结构均被改变；
+	\item \textbf{提前回波}：滩涂、礁石、岛屿等正海拔地形使对应面元的双程延迟缩短（提前 $2 \Delta h / c$），在波形前缘之前形成附加回波，直接破坏 $t_0$ 与 SSH 的对应关系；
+	\item \textbf{近岸环境差异}：浅水波候、潮流与地形改变近岸海面统计特性，使近岸 $\sigma^0$ 与波高分布偏离开阔海气候态。
+\end{enumerate}
+
+\reffig{fig:nearshore-stack} 给出 Jason-3 在闽浙沿岸一条上升弧段的实测波形随离岸距离的演变：开阔海段（图下部）为标准海洋波形，前沿对齐、形态一致；接近海岸后（图上部）前沿结构紊乱、波形间出现强尖峰（陆地）与多峰复杂形态，直观展示了近海波形偏离 Brown 模型的实际形态。
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.98\textwidth]{nearshore_stack.png}
+	\caption{Jason-3 c603 p147 闽浙沿岸弧段 20 Hz 实测 Ku 波段波形堆叠（沿轨索引 43200--45999，自离岸 58.7 km 减至 10.4 km；按地表分类着色：蓝——海面，红——陆地，绿——其他）。近岸段前沿结构紊乱并混入陆地尖峰波形}
+	\label{fig:nearshore-stack}
+\end{figure}
+
+受污染波形若直接采用面向开阔海的标准重跟踪算法（如 MLE3/MLE4 拟合、阈值法）处理，将引入系统性偏差，且偏差随污染程度增长而无界——这正是本文通过受控仿真定量回答“近海波形畸变如何映射为参数反演误差”的动机：第 \ref{chap:simulation} 章建立含陆地要素的近海回波仿真，第 \ref{chap:error} 章给出反演误差的定量结果与波形质量判据。
 
 \sectionbreak
 
@@ -476,7 +593,7 @@
 		采样率（带宽） & $B$ & 320 MHz \\
 		距离门数 & & 104 \\
 		距离门间隔 & & 3.125 ns（0.469 m） \\
-		采样窗（相对平均海平面双程延迟） & & $-50$ ~ $+272$ ns \\
+		采样窗（相对平均海平面双程延迟） & & $-50 \sim +272$ ns \\
 		海水相对介电常数 & $\varepsilon_s$ & $47.08 + 39.07\,\mathrm{j}$ \\
 		法向菲涅尔反射率 & $\rho$ & 0.6173 \\
 		\bottomrule
@@ -537,7 +654,7 @@
 
 为使波高统计不受网格截断影响，本文将生成的海面高度场归一化到完整 PM 理论值 $\sigma_h$（式 \eqref{eq:swh}），以补偿未解析波段与方向谱展宽损失的方差；其代价是已解析长波的斜率被同步放大。在默认的几何入射角口径下（见 \ref{sec:facetsim} 节）斜率不参与散射调制，该代价无影响；仅在启用长波倾斜调制的诊断运行（第 \ref{chap:error} 章）中需要计入。当 $U_{19.5} < 6$ m/s 时 $\gamma_{\mathrm{cap}}$ 过低，归一化放大失真显著，该口径不再适用，需改用显式两尺度分解（见第 6 章展望）。
 
-\reftab{tab:seastates} 给出本文采用的三档海况及其关键参数；\reffig{fig:pm} 为三档风速下生成的海面样例。天底 $\sigma^0(0) = \rho / (2 \sqrt{\sigma_u^{2} \sigma_c^{2}})$ 随风速增大而下降（13.22/12.51/11.90 dB），是高度计风速测量的物理基础（见 \ref{sec:facetsim} 节）。
+\reftab{tab:seastates} 给出本文采用的三档海况及其关键参数；\reffig{fig:pm} 为三档风速下生成的海面样例。天底 $\sigma^0(0) = \rho / (2 s_u s_c)$（2.3 节）随风速增大而下降（13.22/12.51/11.90 dB），是高度计风速测量的物理基础。
 
 \begin{table}[htpb]
 	\centering
@@ -572,27 +689,9 @@
 	R = \sqrt{x^{2} + y^{2} + (H - \eta)^{2}}, \qquad \tau = \frac{2R}{c}, \qquad \theta = \arctan \frac{\sqrt{x^{2} + y^{2}}}{H}
 	\label{eq:geom}
 \end{equation}
-天线采用高斯功率方向图
-\begin{equation}
-	G(\theta) = \exp\!\left( -\frac{\theta^{2}}{2 \sigma_\theta^{2}} \right)
-	\label{eq:gain}
-\end{equation}
-$\sigma_\theta$ 由半功率角确定：$\theta$ 等于半波束宽度 $1.1^\circ$ 时 $G$ 降至 $1/2$，解得 $\sigma_\theta = 0.934^\circ$。
+天线采用 2.1 节的高斯功率方向图（式 \eqref{eq:gain}），其 $\sigma_\theta = 0.934^\circ$。
 
-面元后向散射采用几何光学（GO）近似与各向异性 Cox--Munk 斜率概率密度\cite{coxmunk1954}：
-\begin{equation}
-	\sigma^0(\theta, \phi) = \frac{\rho\, \pi}{\cos^{4} \theta}\, p\!\left( \tan\theta, 0 \right), \qquad p = \frac{1}{2 \pi \sqrt{\sigma_u^{2} \sigma_c^{2}}} \exp\!\left( -\frac{\tan^{2} \theta}{v} \right)
-	\label{eq:sigma0}
-\end{equation}
-\begin{equation}
-	\frac{1}{v} = \frac{1}{2} \left( \frac{\cos^{2}(\phi - \phi_v)}{\sigma_u^{2}} + \frac{\sin^{2}(\phi - \phi_v)}{\sigma_c^{2}} \right)
-	\label{eq:vdef}
-\end{equation}
-式中 $\phi$ 为面元方位角，$\sigma_u^{2}$、$\sigma_c^{2}$ 分别为顺风向与交叉风向斜率方差，取 Cox--Munk 型随风速线性变化的经验关系（对应文献\cite{refpaper}式(4.9)、(4.10)）：
-\begin{equation}
-	\sigma_u^{2} = 0.00078545\, U_{19.5} + 0.0092407, \qquad \sigma_c^{2} = 0.00052799\, U_{19.5} + 0.0097295
-	\label{eq:slopevar}
-\end{equation}
+面元后向散射采用 2.3 节的各向异性几何光学（GO）模型：按式 \eqref{eq:sigma0}--\eqref{eq:slopevar} 逐面元计算 $\sigma^0(\theta, \phi)$，斜率方差取随风速线性变化的 Cox--Munk 经验关系\cite{coxmunk1954}。
 
 两尺度口径在此体现为：式 \eqref{eq:slopevar} 的斜率统计包含全部波段的贡献（短波不可解析，由统计量承载），而波高分布与延迟分布仅由 PM 长波海面承载。面元散射按几何入射角计算，即长波倾斜不调制 $\sigma^0$——这与 Brown 模型的假设严格一致，便于 \ref{sec:sim-validation} 节的同口径对照；长波倾斜的调制作为二阶效应在第 \ref{chap:error} 章单独讨论。
 
@@ -640,16 +739,11 @@ $\sigma_\theta$ 由半功率角确定：$\theta$ 等于半波束宽度 $1.1^\cir
 \subsection{仿真结果的 Brown 模型对照验证}
 \label{sec:sim-validation}
 
-Brown 平均回波模型\cite{brown1977}将平均回波表示为三个物理因子的卷积：
-\begin{equation}
-	W(t) = P_{\mathrm{FS}}(t) \ast q_s(t) \ast S_r(t)
-	\label{eq:brown}
-\end{equation}
-式中 $P_{\mathrm{FS}}$ 为平坦海面冲激响应，$q_s$ 为海面波高概率密度（本文取高斯形式，标准差 $\sigma_\tau = 2 \sigma_h / c$，偏度 $\lambda_s = 0$），$S_r$ 为点目标响应（式 \eqref{eq:ptr}）。Hayne\cite{hayne1980}给出了包含误指向角与偏度修正的二阶解析展开，其零阶形式即式 \eqref{eq:brown}，第 2 章已作详细讨论。
+被对照的基准是 2.2 节的 Brown 平均回波模型\cite{brown1977}（式 \eqref{eq:brown}）：平坦海面冲激响应、高斯波高概率密度（偏度 $\lambda_s = 0$）与点目标响应（式 \eqref{eq:ptr}）的三重卷积。
 
 本文采用“同口径数值对照”的验证策略：$P_{\mathrm{FS}}$ 不使用解析式，而用与逐面元仿真完全相同的代码路径计算——海面高度取零的平面、同一几何、增益、散射模型、分箱方式与空间截断。这样，两种方法在所有数值口径上严格一致，差异只来自“随机起伏海面与平面”本身，系综平均的逐面元仿真应收敛到 Brown 数值模型。相比与解析式的比较，这是一条口径更干净的正确性检验。
 
-\reffig{fig:val} 给出 $U_{19.5} = 12$ m/s（SWH $= 3.07$ m）的对照结果。以平台区功率归一化后：前沿区（$-20$ ~ $+80$ ns）相对偏差 RMS 为 0.74\%，平台功率比（仿真/Brown）为 1.0002；三档海况的前沿区偏差 RMS 均不超过 0.8\%，平台功率比偏差不超过 0.3\%。偏差集中在波形端部——前缘之前的“提前回波”与远尾（$> 180$ ns，5\%--14\% 且随风速增大）——机理是归一化 PM 长波海面的波高概率密度在端部偏离高斯假设，其中前缘前提前回波偏强（约 1\%）正是第 \ref{chap:error} 章模型失配分析中 SWH 系统性低估 10\%--16\% 的原因（见 \ref{sec:mismatch-error} 节）。反演关注的平台区与前沿区一致性在 1\% 以内，仿真链路的正确性得到验证。
+\reffig{fig:val} 给出 $U_{19.5} = 12$ m/s（SWH $= 3.07$ m）的对照结果。以平台区功率归一化后：前沿区（$-20 \sim +80$ ns）相对偏差 RMS 为 0.74\%，平台功率比（仿真/Brown）为 1.0002；三档海况的前沿区偏差 RMS 均不超过 0.8\%，平台功率比偏差不超过 0.3\%。偏差集中在波形端部——前缘之前的“提前回波”与远尾（$> 180$ ns，5\%--14\% 且随风速增大）——机理是归一化 PM 长波海面的波高概率密度在端部偏离高斯假设，其中前缘前提前回波偏强（约 1\%）正是第 \ref{chap:error} 章模型失配分析中 SWH 系统性低估 10\%--16\% 的原因（见 \ref{sec:mismatch-error} 节）。反演关注的平台区与前沿区一致性在 1\% 以内，仿真链路的正确性得到验证。
 
 \begin{figure}[H]
 	\centering
@@ -731,19 +825,9 @@ Brown 平均回波模型\cite{brown1977}将平均回波表示为三个物理因�
 
 \subsubsection{海水盐度与温度的敏感性}
 
-海水相对介电常数采用 Debye 弛豫模型（Klein--Swift 型经验参数化\cite{refpaper}）：
-\begin{equation}
-	\varepsilon(S, T, f) = \varepsilon_\infty + \frac{\varepsilon_1(S, T) - \varepsilon_\infty}{1 + (2 \pi f \tau)^{2}} + \mathrm{j} \left[ \frac{2 \pi f \tau\, \left( \varepsilon_1(S, T) - \varepsilon_\infty \right)}{1 + (2 \pi f \tau)^{2}} + \frac{\sigma_i(S, T)}{2 \pi f \varepsilon_0} \right]
-	\label{eq:debye}
-\end{equation}
-式中 $\varepsilon_\infty = 4.9$，静态介电常数 $\varepsilon_1$、弛豫时间 $\tau$ 与离子电导率 $\sigma_i$ 均为盐度 $S$ 与温度 $T$ 的经验多项式（具体表达式见文献\cite{refpaper}式(2.21)--(2.23)），$\varepsilon_0$ 为真空介电常数。法向菲涅尔反射率为
-\begin{equation}
-	\rho = \left| \frac{1 - \sqrt{\varepsilon}}{1 + \sqrt{\varepsilon}} \right|^{2}
-	\label{eq:fresnel}
-\end{equation}
-在锚点（13.575 GHz、20 $^\circ$C、35‰）本文实现给出 $\varepsilon = (47.10,\ 39.06)$，与参考论文值 $(47.08,\ 39.07)$ 一致到第三位有效数字，对应 $\rho = 0.6173$（\reftab{tab:params}）。
+海水的相对介电常数与法向菲涅尔反射率采用 2.4 节的 Debye 模型（式 \eqref{eq:debye}、\eqref{eq:fresnel}）。本文实现在锚点（13.575 GHz、20 $^\circ$C、35‰）给出 $\varepsilon = (47.10,\ 39.06)$，与参考论文值 $(47.08,\ 39.07)$ 一致到第三位有效数字，对应 $\rho = 0.6173$（\reftab{tab:params}）。
 
-由于 GO 模型中 $\sigma^0 \propto \rho$ 为纯幅度缩放，盐度与温度只平移回波平台、不改变波形形状。\reffig{fig:eps} 给出敏感性扫描：盐度 0--40‰ 引起的平台功率变化不超过 0.003 dB，完全可忽略——这正是 Ku 波段高度计反演无需盐度修正的物理依据；温度 $-2$ ~ $30\,^\circ$C 引起 $-0.20$ ~ $+0.01$ dB 的系统性变化，量级虽小但不可忽略，反演风速时需进行温度修正（其误差传播见 \ref{sec:wind} 节）。
+由于 GO 模型中 $\sigma^0 \propto \rho$ 为纯幅度缩放，盐度与温度只平移回波平台、不改变波形形状。\reffig{fig:eps} 给出敏感性扫描：盐度 0--40‰ 引起的平台功率变化不超过 0.003 dB，完全可忽略——这正是 Ku 波段高度计反演无需盐度修正的物理依据；温度 $-2 \sim 30\,^\circ$C 引起 $-0.20 \sim +0.01$ dB 的系统性变化，量级虽小但不可忽略，反演风速时需进行温度修正（其误差传播见 \ref{sec:wind} 节）。
 
 \begin{figure}[H]
 	\centering
@@ -849,14 +933,44 @@ Brown 平均回波模型\cite{brown1977}将平均回波表示为三个物理因�
 \begin{thebibliography}{99}
 	\label{bibref}
 	\seccontent
-	\bibitem{refpaper} TODO：作者. 基于电磁散射特性的雷达高度计回波仿真与分析[D]. 武汉: 华中科技大学, 硕士学位论文.（作者与年份从参考文献/ 目录的 PDF 补齐）
-	\bibitem{pm1964} Pierson W J, Moskowitz L. A proposed spectral form for fully developed wind seas based on the similarity theory of S A Kitaigorodskii. Journal of Geophysical Research, 1964, 69(24): 5181-5190
-	\bibitem{thorsos1990} Thorsos E I. Acoustic scattering from a Pierson-Moskowitz sea surface. The Journal of the Acoustical Society of America, 1990, 88(1): 335-349
-	\bibitem{coxmunk1954} Cox C, Munk W. Measurement of the roughness of the sea surface from photographs of the sun's glitter. Journal of the Optical Society of America, 1954, 44(11): 838-850
-	\bibitem{brown1977} Brown G S. The average impulse response of a rough surface and its applications. IEEE Transactions on Antennas and Propagation, 1977, 25(1): 67-74
-	\bibitem{hayne1980} Hayne G S. Radar altimeter mean return waveforms from near-normal-incidence ocean surface scattering. IEEE Transactions on Antennas and Propagation, 1980, 28(5): 687-692
-	\bibitem{todo-jason3} TODO：Jason-3 / SGDR 产品文档（CNES/AVISO），绪论与第 5 章引用
-	\bibitem{todo-others} TODO：绪论其余引用文献（从参考文献/ 目录整理：近海重跟踪、ALES 等）
+	% 参考文献列表沿用 2026 年 5 月提交稿（GB/T 7714 风格），去除原稿两条重复
+	% （原[10]=[18] Raney、原[17]与[28]同文），thorsos1990/coxmunk1954 为本文补充
+	\bibitem{brown1977} BROWN G S. The average impulse response of a rough surface and its applications[J]. IEEE Transactions on Antennas and Propagation, 1977, 25(1): 67-74.
+	\bibitem{chelton2001} CHELTON D B, RIES J C, HAINES B J, 等. Satellite altimetry[M]//FU L L, CAZENAVE A. Satellite altimetry and earth sciences: a handbook of techniques and applications. San Diego: Academic Press, 2001: 1-131.
+	\bibitem{mcgoogan1974} MCGOOGAN J T, MILLER L S, BROWN G S, 等. The S-193 radar altimeter experiment[J/OL]. Proceedings of the IEEE, 1974, 62(6): 793-803. DOI:10.1109/PROC.1974.9519.
+	\bibitem{tapley1982} TAPLEY B D, BORN G H, PARKE M E. The Seasat altimeter mission[J/OL]. Journal of Geophysical Research, 1982, 87(C5): 3179-3188. DOI:10.1029/JC087iC05p03179.
+	\bibitem{macarthur1987} MACARTHUR J L, WAKKER K F. Geosat mission design[J]. Johns Hopkins APL Technical Digest, 1987, 8(2): 188-195.
+	\bibitem{fu1994} FU L L, CHRISTENSEN E J, YAMARONE C A, 等. TOPEX/POSEIDON mission overview[J/OL]. Journal of Geophysical Research, 1994, 99(C12): 24369-24381. DOI:10.1029/94JC01761.
+	\bibitem{menard2003} MÉNARD Y, FU L L, ESCUDIER P, 等. The Jason-1 mission[J/OL]. Marine Geodesy, 2003, 26(3-4): 131-146. DOI:10.1080/01490410390259182.
+	\bibitem{beckley2010} BECKLEY B D, ZELENSKY N P, HOLMES S A, 等. Assessment of the Jason-2 extension to the TOPEX/Poseidon, Jason-1 sea-surface height time series for global mean sea level monitoring[J/OL]. Marine Geodesy, 2010, 33(sup1): 447-471. DOI:10.1080/01490419.2010.491029.
+	\bibitem{zaouche2010} ZAOUCHE G, PERBOS J, LAFON T, 等. OSTM/Jason-2: Assessment of the system performances (Ocean Surface Topography Mission: OSTM)[J/OL]. Marine Geodesy, 2010, 33(sup1): 26-52. DOI:10.1080/01490419.2010.488978.
+	\bibitem{raney1998} RANEY R K. The delay/Doppler radar altimeter[J/OL]. IEEE Transactions on Geoscience and Remote Sensing, 1998, 36(5): 1578-1588. DOI:10.1109/36.714618.
+	\bibitem{wingham2006} WINGHAM D J, FRANCIS C R, BAKER S, 等. CryoSat: A mission to determine the fluctuations in the mass of the Earth's land and marine ice[J/OL]. Advances in Space Research, 2006, 37(7): 1207-1217. DOI:10.1016/j.asr.2005.07.027.
+	\bibitem{donlon2012} DONLON C, BERRUTI B, BUONGIORNO A, 等. The Copernicus Sentinel-3 mission[J/OL]. Remote Sensing of Environment, 2012, 120: 37-57. DOI:10.1016/j.rse.2011.07.024.
+	\bibitem{fu2004} FU L L, RODRIGUEZ E. High-resolution measurement of ocean surface topography from space[J/OL]. Eos, Transactions American Geophysical Union, 2004, 85(48): 1-5. DOI:10.1029/2004EO480001.
+	\bibitem{biancamaria2016} BIANCAMARIA S, DURAND M, ANDREADIS K M, 等. The Surface Water and Ocean Topography (SWOT) mission: Overview and status[C/OL]//2016 IEEE international geoscience and remote sensing symposium (IGARSS). IEEE, 2016: 1-4. DOI:10.1109/IGARSS.2016.7729230.
+	\bibitem{rodriguez1988} RODRIGUEZ E. Altimetry for non-Gaussian oceans: Height biases and estimation of parameters[J]. Journal of Geophysical Research, 1988, 93(C11): 14107.
+	\bibitem{zavorotny2000} ZAVOROTNY V U, VORONOVICH A G. Scattering of GPS signals from the ocean with wind remote sensing application[J]. IEEE Transactions on Geoscience and Remote Sensing, 2000, 38: 951-964.
+	\bibitem{martin1983} MARTIN T V, ZWALLY H J, BRENNER A C, 等. Analysis and retracking of continental ice sheet radar altimeter waveforms[J/OL]. Journal of Geophysical Research: Oceans, 1983, 88(C3): 1608-1616. DOI:10.1029/JC088iC03p01608.
+	\bibitem{pm1964} PIERSON W J, MOSKOWITZ L. A proposed spectral form for fully developed wind sea based on the similarity theory of S. A. Kitaigorodskii[J]. Journal of Geophysical Research, 1964, 69: 5181-5190.
+	\bibitem{hayne1980} HAYNE G S. Radar altimeter mean return waveforms from near-normal-incidence ocean surface scattering[J]. IEEE Transactions on Antennas and Propagation, 1980, 28(5): 687-692.
+	\bibitem{leichangquan1995} 雷昌全. 海洋卫星雷达高度计(续)[J]. 空间电子技术, 1995, 000(3): 40-59.
+	\bibitem{zhangjunrong1995} 张俊荣, 王丽巍, 张德海. 植被和土壤的微波介电常数[J/OL]. 遥感技术与应用, 1995, 10(3): 40-50. DOI:10.11873/j.issn.1004-0323.1995.3.40.
+	\bibitem{refpaper} 徐浩. 基于电磁散射特性的雷达高度计回波仿真与分析[D]. 华中科技大学, 2020.
+	\bibitem{yangle2009} 杨乐. 卫星雷达高度计在中国近海及高海况下遥感反演算法研究[D]. 南京理工大学, 2009.
+	\bibitem{lefevre1994} LEFEVRE J M, BARCKICKE J, MENARD Y. A significant wave height dependent function for TOPEX/POSEIDON wind speed retrieval[J]. Journal of Geophysical Research: Oceans, 1994, 99(C12): 25035-25049.
+	\bibitem{wingham1986} WINGHAM D J, RAPLEY C G, GRIFFITHS H. New techniques in satellite altimetry tracking systems[C]//Proceedings of the 1986 international geoscience and remote sensing symposium (IGARSS'86). Noordwijk: ESA Publication Division, 1986: 1339-1344.
+	\bibitem{davis1997} DAVIS C H. A robust threshold retracking algorithm for measuring ice-sheet surface elevation change from satellite radar altimeters[J/OL]. IEEE Transactions on Geoscience and Remote Sensing, 1997, 35(4): 974-979. DOI:10.1109/36.602540.
+	\bibitem{bamber1994} BAMBER J L. Ice sheet altimeter processing scheme[J/OL]. International Journal of Remote Sensing, 1994, 15(4): 925-938. DOI:10.1080/01431169408954125.
+	\bibitem{deng2006} DENG X, FEATHERSTONE W E. A coastal retracking system for satellite radar altimeter waveforms: Application to ERS-2 around Australia[J]. Journal of Geophysical Research, 2006, 111(C06012): 285-293.
+	\bibitem{vignudelli2011} VIGNUDELLI S, KOSTIANOY A G, CIPOLLINI P, 等. Coastal altimetry[M/OL]. Berlin, Heidelberg: Springer Science \& Business Media, 2011. DOI:10.1007/978-3-642-12796-0.
+	\bibitem{zwally1990} ZWALLY H J, BRENNER A C, MAJOR J A, 等. Satellite radar altimetry over ice. Vol. 1. Processing and corrections of Seasat data over Greenland: 1233[R]. Washington, DC: NASA Scientific and Technical Information Division, 1990.
+	\bibitem{miyinxia2019} 米银霞. 卫星雷达高度计的海洋参数反演与近海重跟踪算法研究[D]. 华中科技大学, 2019.
+	\bibitem{baolifeng2007} 鲍李峰, 陆洋, 王勇, 等. 由 ERS-1 波形重构确定我国近海平均海平面[J]. 地球物理学进展, 2007, 22(2): 427-431.
+	\bibitem{zhanyihua2021} 展艺华. 卫星雷达高度计近岸回波处理方法研究[D]. 中国科学院大学, 2021.
+	\bibitem{baolifeng2004} 鲍李峰, 陆洋, 许厚泽. 浅海区域 Topex/Poseidon 测高卫星数据波形重构方法[J]. 地球物理学报, 2004, 47(2): 216-221.
+	\bibitem{thorsos1990} THORSOS E I. Acoustic scattering from a Pierson-Moskowitz sea surface[J]. The Journal of the Acoustical Society of America, 1990, 88(1): 335-349.
+	\bibitem{coxmunk1954} COX C, MUNK W. Measurement of the roughness of the sea surface from photographs of the sun's glitter[J]. Journal of the Optical Society of America, 1954, 44(11): 838-850.
 \end{thebibliography}
 
 % ------------------------------------ 附录 ------------------------------------ %
