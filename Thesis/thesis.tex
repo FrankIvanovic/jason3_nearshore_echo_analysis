@@ -146,6 +146,8 @@
 \usepackage{booktabs}
 \usepackage{tabularx}
 \usepackage{makecell}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning}
 \newcolumntype{L}{X}
 \newcolumntype{C}{>{\centering \arraybackslash}X}
 \newcolumntype{R}{>{\raggedright \arraybackslash}X}
@@ -349,16 +351,12 @@
 
 % ----------------------------------- 中文摘要 ----------------------------------- %
 \begin{cnabstract}{卫星雷达高度计；波形仿真；近海；波形重跟踪；误差分析}
-	\hongzifuzhu{中文摘要约 400--600 字，四段式：}
-	\hongzifuzhu{（一）研究背景与意义（1--2 句）：卫星雷达高度计是全球海面高度/有效波高/海面风速观测的核心手段，近海回波受陆地带污染导致波形畸变，参数反演精度显著下降；}
-	\hongzifuzhu{（二）本文做了什么：基于 PM 谱随机海面建立逐面元时域回波仿真模型（含 Brown 模型对照），实现近海沙滩/礁石/岛屿复合场景回波仿真；在此基础上实现阈值法、Brown 拟合与 Hayne 二阶模型三种重跟踪反演方法，构建“散斑随机误差—近海系统误差—模型失配误差”三层误差分析框架；}
-	\hongzifuzhu{（三）主要结果（给数字）：如礁石位于天底点时 SSH 偏差 +40 cm、岛屿 +78 cm；散斑误差随平均门数按 1/sqrt(N) 收敛；拟合残差 RMS 可作波形质量判据并被 Jason-3 实测数据印证（近海 10.9\% vs 开阔海 8.1\%）等；}
-	\hongzifuzhu{（四）结论与意义一句话。关键词 3--5 个。}
+	卫星雷达高度计是全球海面高度、有效波高与海面风速观测的核心手段；近海区域回波受陆地污染、波形畸变，标准海洋波形反演的参数精度显著下降，而近海恰是海岸带防灾减灾与海洋动力研究的高需求区域。本文围绕“近海回波畸变如何映射为参数反演误差”，基于 PM 谱随机海面建立逐面元时域回波仿真模型（以 Brown 平均回波模型作同口径数值对照），仿真了沙滩条带、礁石与岛屿三类近海复合场景的波形畸变；实现了阈值法、Brown 数值拟合与 Hayne 二阶解析模型三种波形重跟踪反演方法及后向散射系数反演风速流程；构建了“散斑随机误差—近海畸变系统误差—模型失配误差”三层误差分析框架，并以 Jason-3 实测波形（闽浙沿岸）对照验证。仿真链路与 Brown 模型在前沿与平台区的一致性优于 1\%；单实现散斑误差为 SWH 1.7$\sim$10.2 cm、SSH 0.16$\sim$1.06 cm，多视平均按 $1/\sqrt{N}$ 收敛；近海畸变引起的系统误差最大达 SSH $+78.5$ cm（岛屿位于天底点）与 SWH $+1.98$ m（岛屿距天底点 2.2 km）；拟合残差随污染升高至开阔海基线的 6 倍（1.2\%$\to$7.4\%），可作为波形质量通用判据，并被实测数据印证（近海 10.9\% 对开阔海 8.4\%）。本文定量给出了近海回波畸变到参数反演误差的映射关系与误差预算，为近海高度计产品的质量控制与偏差订正提供了依据。
 \end{cnabstract}
 
 % ----------------------------------- 英文摘要 ----------------------------------- %
 \begin{enabstract}{satellite radar altimeter; waveform simulation; coastal zone; waveform retracking; error analysis}
-	\hongzifuzhu{英文摘要与中文摘要内容一一对应，写完中文后翻译润色。}
+	Satellite radar altimeters are a primary means of observing the global sea surface height, significant wave height, and sea surface wind speed. In coastal waters, however, the returns are contaminated by land and the waveforms are distorted, which considerably degrades the accuracy of standard ocean waveform retracking. Focusing on how coastal waveform distortion maps into parameter inversion errors, this thesis establishes a facet-based time-domain echo simulation model on the basis of Pierson--Moskowitz random sea surfaces, validated against the Brown mean return model under identical numerical settings, and simulates the waveform distortions in three typical coastal composite scenarios: beach strips, reefs, and islands. Three waveform retracking retrievers are then implemented---the threshold method, least-squares fitting with the numerical Brown model, and fitting with Hayne's second-order analytic model---together with a wind speed retrieval scheme based on the nadir backscatter coefficient. A three-layer error analysis framework is constructed, consisting of speckle random error, coastal-distortion systematic error, and model-mismatch error, and is cross-validated with Jason-3 measurements off the Fujian--Zhejiang coast. The simulated link agrees with the Brown model to better than 1\% over the leading edge and plateau; the single-look speckle error is 1.7--10.2 cm in SWH and 0.16--1.06 cm in SSH, converging as $1/\sqrt{N}$ with multi-look averaging; the coastal distortion induces systematic errors up to $+78.5$ cm in SSH (island at nadir) and $+1.98$ m in SWH (island 2.2 km off nadir); the fitting residual, rising to six times the open-ocean baseline ($1.2\% \to 7.4\%$) as contamination increases, serves as a generic waveform quality criterion and is confirmed by the Jason-3 data (10.9\% nearshore versus 8.4\% open ocean). These results quantify the mapping from coastal waveform distortion to parameter inversion errors and provide a basis for quality control and bias correction of coastal altimeter products.
 \end{enabstract}
 
 % ------------------------------------ 目录 ------------------------------------ %
@@ -391,19 +389,33 @@
 
 \subsection{研究背景与意义}
 \label{sec:background}
-\hongzifuzhu{写什么：卫星雷达高度计对全球海洋观测的价值（海面高度→大尺度海洋环流/海平面上升，有效波高→波浪预报，$\sigma^0$→风速）；测高卫星系列一句话带过（Topex/Poseidon—Jason—Sentinel-6）；引出问题——近海（<10 km）区域回波受陆地污染、波形畸变，标准产品精度下降，而近海恰是航运/风暴潮/ coastal 灾害重点区。落点：本文通过“仿真+反演+误差分析”闭环定量回答“近海回波畸变如何映射为参数反演误差”。}
+卫星雷达高度计通过测量雷达脉冲到海面的往返时延与回波波形，同时获得海面高度（SSH）、有效波高（SWH）与后向散射系数 $\sigma^0$（进而反演海面风速）三个基本海洋参数\cite{chelton2001}：海面高度是全球大尺度海洋环流、海平面变化与气候监测的核心观测量；有效波高为海浪预报与海洋工程提供关键输入；海面风速则支撑海气相互作用研究。自 1973 年 Skylab 试验搭载 S-193 高度计\cite{mcgoogan1974}起，测高卫星历经 Seasat\cite{tapley1982}、Geosat\cite{macarthur1987}、Topex/Poseidon\cite{fu1994}、Jason 系列\cite{menard2003,beckley2010,zaouche2010}与 Sentinel-3/6\cite{donlon2012}等任务迭代，海面高度测量精度已达到厘米级，成为对地观测体系中精度最高的手段之一。
+
+然而，高度计的成熟精度主要建立在开阔海域。近海（离岸 10 km 以内）区域，高度计足印内混入陆地回波，波形发生畸变，标准海洋波形重跟踪算法给出的参数出现系统性偏差，导致近海测高产品精度显著下降\cite{vignudelli2011,deng2006}；而近海恰是航运安全、风暴潮预警、近岸海洋动力过程与海岸带灾害研究的重点区域，对高精度观测需求迫切。近海回波畸变与参数反演误差之间的定量映射关系，是这一领域的基础性问题：畸变波形的形态如何、多大程度的污染产生多大的参数偏差、能否由波形本身识别污染。回答这些问题，需要在受控条件下对“回波生成—波形反演—误差产生”的整条链路进行系统的量化研究。本文即通过“仿真正演 + 多方法反演 + 分层误差分析”的研究闭环，定量回答近海回波畸变如何映射为海洋参数反演误差。
 
 \subsection{国内外研究现状}
 \label{sec:related}
-\hongzifuzhu{写什么（三块，各 3--5 段，要有引文）：}
-\hongzifuzhu{（一）测高卫星与数据处理的发展：Jason-1/2/3、Sentinel-6 MF，SGDR/GDR 产品与 MLE3/MLE4 重跟踪；}
-\hongzifuzhu{（二）海面回波仿真方法：Brown（1977）卷积模型、Hayne（1980）二阶解析模型、逐面元时域/频域仿真、海面谱模型（PM 谱、Eluhihb 一维谱等）；}
-\hongzifuzhu{（三）波形重跟踪与近海处理：OCOG/阈值法、Beta5/9 拟合、物理法（Brown/Hayne 拟合）、近海专用算法（如 ALES、 coastal retracking）；国内近海高度计研究简述。}
-\hongzifuzhu{引用的参考文献/ 需要整理成 bib 条目。}
+围绕波形建模与近海处理的研究可归纳为三个方面。
+
+\textbf{（1）测高卫星与数据处理。} 1973 年 Skylab 搭载的 S-193 试验高度计首次验证了星载测高的可行性\cite{mcgoogan1974}；1978 年 Seasat 首次实现全球海面高度测量\cite{tapley1982}；1992 年发射的 Topex/Poseidon 使测高精度进入厘米级，奠定了现代卫星测高的基准\cite{fu1994}。此后的 Jason 系列（Jason-1/2/3）延续了同一轨道与高精度时间序列\cite{menard2003,beckley2010,zaouche2010}，Sentinel-3/6 等新一代任务进一步提升精度与时空覆盖\cite{donlon2012}。在数据处理层面，星载实时处理器采用最大似然估计器（MLE3/MLE4）对波形作物理重跟踪，地面产品（GDR/SGDR）提供 20 Hz 波形、轨道与地球物理修正\cite{chelton2001}；延迟-多普勒（SAR）体制（如 CryoSat）与宽刈幅干涉测高（SWOT）等新体制正在拓展高度计的观测能力\cite{raney1998,wingham2006,biancamaria2016}。
+
+\textbf{（2）海面回波建模与仿真。} Brown（1977）将脉冲有限高度计的平均回波表示为平坦海面冲激响应、波高概率密度与系统响应的三重卷积，奠定了高度计回波建模的基石\cite{brown1977}；Hayne（1980）给出包含波高偏度与误指向角修正的二阶解析展开\cite{hayne1980}。两者至今仍是波形重跟踪中物理模型的基础。在面散射层面，几何光学近似与 Cox--Munk 斜率统计\cite{coxmunk1954}建立了后向散射系数与风速的经验联系；以 PM 谱为代表的随机海面模型\cite{pm1964}与谱域线性滤波生成方法\cite{thorsos1990}为逐面元回波仿真提供了海面输入。近年来，基于电磁散射特性的逐面元时域/频域仿真方法得到发展，徐浩系统建立了含近海复合场景的高度计回波仿真模型\cite{refpaper}；Rodriguez 则分析了海面高度非高斯分布对参数反演偏差的影响\cite{rodriguez1988}。
+
+\textbf{（3）波形重跟踪与近海处理。} 波形重跟踪是参数反演的核心环节：阈值类方法以 OCOG\cite{wingham1986}与 Davis 阈值重跟踪\cite{davis1997}为代表，计算简单、应用广泛，常用于冰盖与近海波形；参数化拟合类方法以 Brown/Hayne 模型对波形作最小二乘拟合，物理意义明确；Beta 系列算法\cite{martin1983}则面向冰面波形设计。风速反演方面，在 Cox--Munk 关系基础上引入有效波高修正可改善反演表现\cite{lefevre1994}。近海方向上，ALES 等近海专用重跟踪系统\cite{deng2006}与海岸带测高专著\cite{vignudelli2011}系统总结了近海波形污染机制与处理策略；国内学者亦开展了浅海波形重构与近海重跟踪研究\cite{baolifeng2004,baolifeng2007,yangle2009,miyinxia2019,zhanyihua2021}。总体而言，近海处理仍以辅助信息判别与逐波形修复为主，回波畸变形态与参数反演误差之间尚缺乏系统、定量的映射研究，这正是本文的出发点。
 
 \subsection{本文主要工作与章节安排}
 \label{sec:outline}
-\hongzifuzhu{写什么：逐条列出本文四项工作（海面与回波仿真、近海场景扩展、三种重跟踪反演实现、三层误差分析与 Jason-3 实测验证），然后一段话给出各章内容安排。}
+本文以 Jason-3 高度计为仿真对象，围绕“近海回波畸变如何映射为参数反演误差”开展如下四项工作：
+
+（1）建立基于 PM 谱随机海面的逐面元时域回波仿真模型，复现平均回波的三段结构与波形族特征，并以 Brown 模型作同口径数值对照，验证仿真链路的正确性（第 \ref{chap:simulation} 章）；
+
+（2）将沙滩条带、礁石与岛屿三类陆地要素引入近海复合场景，仿真不同占比与位置下的波形畸变，定量给出陆地对回波形态的影响（第 \ref{chap:simulation} 章）；
+
+（3）实现阈值法、Brown 数值拟合与 Hayne 二阶解析模型三种波形重跟踪反演器，覆盖 SSH/SWH 反演与 $\sigma^0$ 风速反演（第 \ref{chap:retracking} 章）；
+
+（4）构建“散斑随机误差—近海畸变系统误差—模型失配误差”三层误差分析框架，以仿真数据量化各层误差并构造波形质量判据，以 Jason-3 实测数据（闽浙沿岸弧段）对照验证（第 \ref{chap:error} 章）。
+
+全文共六章：第 1 章为绪论；第 2 章介绍卫星雷达高度计海洋回波测量原理，包括测距体制、Brown/Hayne 波形模型、几何光学散射与海水介电模型；第 3 章建立近海回波波形仿真模型并给出仿真结果；第 4 章给出波形重跟踪与海洋参数反演方法；第 5 章进行分层误差分析与实测验证；第 6 章总结全文并展望后续工作。
 
 \sectionbreak
 
@@ -743,7 +755,7 @@ Hayne\cite{hayne1980}对式 \eqref{eq:brown} 作二阶近似解析展开（本�
 
 本文采用“同口径数值对照”的验证策略：$P_{\mathrm{FS}}$ 不使用解析式，而用与逐面元仿真完全相同的代码路径计算——海面高度取零的平面、同一几何、增益、散射模型、分箱方式与空间截断。这样，两种方法在所有数值口径上严格一致，差异只来自“随机起伏海面与平面”本身，系综平均的逐面元仿真应收敛到 Brown 数值模型。相比与解析式的比较，这是一条口径更干净的正确性检验。
 
-\reffig{fig:val} 给出 $U_{19.5} = 12$ m/s（SWH $= 3.07$ m）的对照结果。以平台区功率归一化后：前沿区（$-20 \sim +80$ ns）相对偏差 RMS 为 0.74\%，平台功率比（仿真/Brown）为 1.0002；三档海况的前沿区偏差 RMS 均不超过 0.8\%，平台功率比偏差不超过 0.3\%。偏差集中在波形端部——前缘之前的“提前回波”与远尾（$> 180$ ns，5\%--14\% 且随风速增大）——机理是归一化 PM 长波海面的波高概率密度在端部偏离高斯假设，其中前缘前提前回波偏强（约 1\%）正是第 \ref{chap:error} 章模型失配分析中 SWH 系统性低估 10\%--16\% 的原因（见 \ref{sec:mismatch-error} 节）。反演关注的平台区与前沿区一致性在 1\% 以内，仿真链路的正确性得到验证。
+\reffig{fig:val} 给出 $U_{19.5} = 12$ m/s（SWH $= 3.07$ m）的对照结果。以平台区功率归一化后：前沿区（$-20 \sim +80$ ns）相对偏差 RMS 为 0.74\%，平台功率比（仿真/Brown）为 1.0002；三档海况的前沿区偏差 RMS 均不超过 0.8\%，平台功率比偏差不超过 0.3\%。偏差集中在波形端部——前缘之前的“提前回波”与远尾（$> 180$ ns，5\%--14\% 且随风速增大）——机理是归一化 PM 长波海面的波高概率密度在端部偏离高斯假设，其中前缘前提前回波偏强（约 1\%）正是第 \ref{chap:error} 章误差分析中 SWH 系统性低估约 16\% 的原因（见 \ref{sec:error-synthesis} 节）。反演关注的平台区与前沿区一致性在 1\% 以内，仿真链路的正确性得到验证。
 
 \begin{figure}[H]
 	\centering
@@ -844,29 +856,96 @@ Hayne\cite{hayne1980}对式 \eqref{eq:brown} 作二阶近似解析展开（本�
 \section{波形重跟踪与海洋参数反演方法}
 \label{chap:retracking}
 
+本章给出基于第 \ref{chap:principle} 章波形模型的海洋参数反演方法，作为后续误差分析的算法基础。第 \ref{sec:retro-flow} 节给出反演总体流程；第 \ref{sec:threshold} 节、\ref{sec:brownfit} 节与 \ref{sec:haynefit} 节分别实现阈值法、Brown 数值模型最小二乘拟合与 Hayne 二阶解析模型三种波形重跟踪反演器；第 \ref{sec:wind} 节由回波平台功率反演海面风速。
+
 \subsection{反演总体流程}
 \label{sec:retro-flow}
-\hongzifuzhu{写什么：从 104 门波形到 SSH/SWH/U 的反演流水线总框图（预处理→初值估计→模型拟合/查表→参数输出）；SSH=t\_0·c/2、SWH=4σ\_h 的参数定义。}
-\hongzifuzhu{建议配图：反演流程框图（需新画）。}
+
+本文反演流水线如\reffig{fig:retro-flow}所示：输入为 104 门回波波形；预处理去除热噪声本底并按峰值功率归一化；初值估计由波形前沿的 50\% 幅度点与 10\%--90\% 宽度给出，供模型拟合使用；随后按精度与速度需求选择阈值法（标定查表，无迭代）或模型拟合法（Brown/Hayne 最小二乘）；最终输出海洋参数。三个输出参数与波形特征之间的定量对应由式 \eqref{eq:erf} 与式 \eqref{eq:hayneparams} 给出：
+\begin{equation}
+	h_{\mathrm{SSH}} = \frac{c}{2}\, t_0, \qquad \mathrm{SWH} = 4 \sigma_h = 2c \sqrt{\sigma_c^{2} - \sigma_p^{2}}
+	\label{eq:param-map}
+\end{equation}
+式中 $t_0$ 为波形前沿半功率点相对参考时延的偏移，$\sigma_c$ 与 $\sigma_p$ 分别为合成波形宽度与点目标响应的高斯等效宽度（式 \eqref{eq:hayneparams}）；风速 $U_{19.5}$ 由平台功率经后向散射系数 $\sigma^0$ 反演（\ref{sec:wind} 节）。
+
+\begin{figure}[H]
+	\centering
+	\resizebox{\textwidth}{!}{%
+	\begin{tikzpicture}[
+		font=\wuhao,
+		node distance=5mm,
+		box/.style={draw, rounded corners=1.2mm, align=center, minimum height=7mm, inner xsep=5pt, fill=blue!4},
+		arrow/.style={-{Stealth[length=2mm]}, thick}
+	]
+		\node[box, fill=gray!12] (wf) {104 门回波波形};
+		\node[box, right=of wf] (pre) {预处理\\（去热噪声、归一化）};
+		\node[box, right=of pre] (init) {初值估计\\（50\% 点、10--90\% 宽度）};
+		\node[box, above right=4mm and 8mm of init] (th) {阈值法（\ref{sec:threshold}）\\标定查表，无迭代};
+		\node[box, below right=4mm and 8mm of init] (fit) {模型拟合（\ref{sec:brownfit}/\ref{sec:haynefit}）\\Brown/Hayne 最小二乘};
+		\node[box, right=21mm of init, fill=green!8] (out) {参数输出\\SSH、SWH、$\sigma^0 \to U_{19.5}$};
+		\draw[arrow] (wf) -- (pre);
+		\draw[arrow] (pre) -- (init);
+		\draw[arrow] (init) -- (th);
+		\draw[arrow] (init) -- (fit);
+		\draw[arrow] (th) -- (out);
+		\draw[arrow] (fit) -- (out);
+	\end{tikzpicture}}
+	\caption{海洋参数反演流水线}
+	\label{fig:retro-flow}
+\end{figure}
 
 \subsection{阈值法重跟踪}
 \label{sec:threshold}
-\hongzifuzhu{写什么：OCOG/50\% 阈值点定位、前缘 10--90 宽度换算；系数由 Brown 模型族标定（SSH/SWH 双标定消除系统差）的做法与优点（无迭代、快、稳）。}
-\hongzifuzhu{配图：fig1\_calibration.png（标定+拟合自检）。}
+阈值法重跟踪以波形前沿的少量几何特征实现无迭代定位。本文将波形作三点平滑并按峰值归一化后，取 50\% 幅度点作为前沿位置 $t_{50}$（跨越点在相邻距离门间线性插值），取 10\% 与 90\% 幅度跨越点之差作为前沿宽度 $W_{10\text{--}90}$。海面高度与有效波高按下式换算：
+\begin{equation}
+	h_{\mathrm{SSH}} = \frac{c}{2}\left( t_{50} - t_{\mathrm{ref}} \right), \qquad \mathrm{SWH} = a\, W_{10\text{--}90} + b
+	\label{eq:threshold}
+\end{equation}
+式中 $t_{\mathrm{ref}}$ 为零波高 Brown 波形的 50\% 点位置，用以消除点目标响应与距离门积分不对称引入的共同系统差；系数 $(a, b)$ 由 Brown 模型族正演波形标定：对真值 $\mathrm{SWH} = 0.25 \sim 8$ m 的 14 档波形按式 \eqref{eq:threshold} 统计前沿宽度并作线性最小二乘，本文参数下得到 $a = 0.2844$ m/ns、$b = -1.619$ m（\reffig{fig:calib} 左）。由于标定族与仿真/实测波形共享同一波形模型，这种“Brown 族标定”（位置与宽度分别取自同一族）在一次标定中即可消除两类系统偏差。阈值法无需迭代、计算量极小，对含噪单波形稳健，工程中常用于快速处理；其局限是只利用波形的少量几何特征，难以感知近海畸变引起的结构变化（见第 \ref{chap:error} 章）。本文反演流水线中，阈值法同时承担模型拟合初值的角色。
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.98\textwidth]{fig1_calibration.png}
+	\caption{阈值法标定与拟合自检。（左）Brown 模型族正演波形的前沿 10\%--90\% 宽度--SWH 标定曲线，虚线为线性标定；（右）$U_{19.5} = 12$ m/s 系综平均波形的 Brown 拟合自检（反演 SWH 2.57 m，真值 3.07 m，残差 RMS 2.2\%）}
+	\label{fig:calib}
+\end{figure}
 
 \subsection{Brown 数值模型最小二乘拟合}
 \label{sec:brownfit}
-\hongzifuzhu{写什么：数值 Brown 正向模型（平坦响应缓存）+最小二乘 (A, t\_0, σ\_h) 三参数拟合；阈值法粗估作初值；为什么误指向角 ξ 不参与联合拟合（与 (A,t\_0,σ\_c) 强耦合、不可辨识——ξ=0.3° 可被 σ\_c+1.3 ns 完全模仿；与 SGDR MLE4 不估 ξ 的工程实践一致）。}
+Brown 数值模型拟合以式 \eqref{eq:brown} 的三重卷积为正向模型，用最小二乘联合估计幅度 $A$、前沿位置 $t_0$ 与海面均方根高度 $\sigma_h$ 三个参数，输出按式 \eqref{eq:param-map} 换算。正向模型复用第 \ref{chap:simulation} 章逐面元仿真的数值链条：平坦海面冲激响应按与仿真完全相同的几何、天线增益、散射模型、延迟分箱与空间截断预计算一次并缓存；每次迭代只需将其与宽度 $\sigma_\tau = 2\sigma_h/c$ 的高斯核作卷积、按 $t_0$ 平移插值，单次正向计算在毫秒量级，使得对数百条波形逐条拟合成为可能。为规避局部极小，拟合采用多重初值策略：$t_0 \in \{-5, 0, 5\}$ ns 与 $\sigma_h \in \{0.3, 0.8, 1.4\}$ m 的组合共 9 组，并附加阈值法粗估初值，取残差最小者。
+
+误指向角 $\xi$ 不参与本文联合拟合。数值实验显示 $\xi$ 与 $(A, t_0, \sigma_c)$ 强耦合：$\xi = 0.3^\circ$ 的波形差异可被 $\sigma_c$ 增大 1.3 ns 完全模仿，单波形联合拟合下 $\xi$ 不可辨识；这与 SGDR 产品 MLE4 算法不估计 $\xi$ 的工程实践一致\cite{chelton2001}。误指向角的等效估计改为诊断式处理，见 \ref{sec:haynefit} 节。
 
 \subsection{Hayne 二阶解析模型拟合}
 \label{sec:haynefit}
-\hongzifuzhu{写什么：Hayne 解析式实现；与数值 Brown 全窗 RMS 1.7\%、前沿区 <0.5\% 的一致性验证；等效误指向角扫描结论 ξ\_eq≈0。}
-\hongzifuzhu{配图：fig4\_hayne\_models.png。}
+Hayne 二阶解析模型拟合采用文献 \cite{refpaper} 式 (5.7)--(5.15) 的解析回波（与式 \eqref{eq:hayne}、\eqref{eq:hayneparams} 等价）：平均回波表示为两项“指数衰减 $\times$ 高斯累积”之和，参数为幅度 $A$、前沿位置 $t_0$、合成宽度 $\sigma_c$ 与误指向角 $\xi$。解析形式的单次正向计算可完全向量化、代价远低于数值卷积，适合对实测波形逐条处理；其近似性在于未计入 $\sigma^0$ 场随入射角的结构变化，对波形远尾的刻画弱于数值模型。本文实现与数值 Brown 模型的一致性验证见 \reffig{fig:hayne}（左）：$\xi = 0$ 时二者全窗 RMS 偏差 1.7\%，前沿与平台区（$0 \sim 120$ ns）偏差小于 0.5\%，满足拟合反演对正向模型精度的要求。
+
+误指向角按诊断式估计：固定其余参数，扫描 $\xi \in [0^\circ, 1^\circ]$（步长 0.05$^\circ$）取残差最小的等效值 $\xi_{\mathrm{eq}}$。对本文仿真波形，$\xi_{\mathrm{eq}} \approx 0.00^\circ$（\reffig{fig:mismatch-wind} 左），表明在 Jason-3 精细姿态控制条件下，误指向效应对波形的影响低于本文可分辨水平；\reffig{fig:hayne}（右）给出误指向角对波形的影响形态——前沿位置与宽度几乎不变，而平台与尾部结构随 $\xi$ 系统性抬升。
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.98\textwidth]{fig4_hayne_models.png}
+	\caption{Hayne 二阶解析模型验证与误指向角效应。（左）$\xi = 0$ 时解析模型与数值 Brown 模型的对比（全窗 RMS 1.7\%）；（右）不同误指向角下的归一化波形（SWH = 3 m）：前沿几乎不变，平台与尾部结构随 $\xi$ 抬升}
+	\label{fig:hayne}
+\end{figure}
 
 \subsection{$\sigma^0$ 反演海面风速}
 \label{sec:wind}
-\hongzifuzhu{写什么：平台窗功率→$\sigma^0$（以 $\sigma^0$≡1 响应归一）→Cox-Munk 正演关系二分解求 U 的闭环自洽方法；盐度/温度误差传播到风速的量化（盐度 |ΔU|≤0.014 m/s 可忽略、温度 |ΔU|≤1.02 m/s 需修正）。}
-\hongzifuzhu{配图：fig6\_mismatch\_wind.png（模型失配+风速闭环部分）。}
+海面风速由回波平台功率反演。远区平台的平均功率正比于天底后向散射系数 $\sigma^0(0)$（式 \eqref{eq:radar}），而 $\sigma^0(0)$ 经几何光学模型（式 \eqref{eq:sigma0}）与 Cox--Munk 斜率方差（式 \eqref{eq:slopevar}）随风速单调下降。本文取平台窗为 $60 \sim 160$ ns，以 $\sigma^0 \equiv 1$ 的理想平坦响应在同一窗口的功率均值为归一因子（该因子只含几何与天线增益常数、与海况无关），得到波形的有效 $\sigma^0$；随后在如下正演关系上二分反解风速：
+\begin{equation}
+	\sigma^0(0) = \frac{\rho}{2\sqrt{s_u^{2} s_c^{2}}}, \qquad s_u^{2},\, s_c^{2} = f(U_{19.5}) \;\Rightarrow\; U_{19.5}
+	\label{eq:windclose}
+\end{equation}
+该流程与仿真正演共用同一组公式，构成闭环自洽检验。对三档仿真海况，反演风速为 $8.01/12.01/16.00$ m/s，与真值（$8/12/16$ m/s）的偏差不超过 0.02 m/s（\reffig{fig:mismatch-wind} 右），验证了平台窗采样、归一化与单调反解各环节的数值正确性；$\sigma^0$--风速经验关系自身的绝对精度取决于 Cox--Munk 关系，超出本文讨论范围。
+
+介电常数扰动经 $\sigma^0$ 传播至风速的量化如下：以本文锚点（13.575 GHz、20 $^\circ$C、35‰）的解算灵敏度为基准，盐度在 $0 \sim 40$‰ 全范围内引起的 $|\Delta U|$ 不超过 0.014 m/s，完全可以忽略——这是 Ku 波段高度计风速反演不作盐度修正的物理依据；温度在 $-2 \sim 30\,^\circ$C 范围内引起 $|\Delta U|$ 不超过 1.02 m/s，量级不可忽略，反演中应引入温度修正（其来源为 \ref{sec:dielectric} 节所述 Debye 弛豫参数的温度依赖）。
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.98\textwidth]{fig6_mismatch_wind.png}
+	\caption{模型失配与风速反演闭环。（左）含长波倾斜的系综平均波形与其无倾斜 Brown 拟合（$\Delta$SSH $= +0.3$ cm、$\Delta$SWH $= -0.3$ cm，等效误指向角 $0.00^\circ$）；（右）$\sigma^0 \to$ 风速闭环检验，标注盐度/温度扰动上界}
+	\label{fig:mismatch-wind}
+\end{figure}
 
 \sectionbreak
 
@@ -874,32 +953,117 @@ Hayne\cite{hayne1980}对式 \eqref{eq:brown} 作二阶近似解析展开（本�
 \section{误差分析与 Jason-3 实测数据验证}
 \label{chap:error}
 
+本章在第 \ref{chap:simulation} 章仿真波形与第 \ref{chap:retracking} 章反演方法的基础上，对海洋参数反演的误差进行分层定量分析，并以 Jason-3 实测数据对照验证。第 \ref{sec:error-design} 节给出三层误差分析框架；第 \ref{sec:speckle-error} 节分析散斑随机误差与多视平均收敛；第 \ref{sec:nearshore-error} 节给出近海畸变引起的系统偏差与波形质量判据；第 \ref{sec:mismatch-error} 节评估模型失配误差；第 \ref{sec:jason3-validation} 节以实测数据检验；第 \ref{sec:error-synthesis} 节综合三层结果给出近海误差预算。
+
 \subsection{误差分析总体设计}
 \label{sec:error-design}
-\hongzifuzhu{写什么：三层误差分析框架的定义与动机——第 1 层散斑随机误差（仿真单实现逐条反演，统计 std）、第 2 层近海畸变系统误差（污染场景 vs 各自 baseline）、第 3 层模型失配误差（长波倾斜/误指向角）；仿真数据（24 实现×3 风速+近海场景）与实测数据（Jason-3 c603p147 闽浙沿岸，2025-07-22）双数据源设计。}
+
+按统计性质与物理来源，本文将反演误差划分为三个层次，分别以对应手段定量评估：
+\begin{enumerate}
+	\item \textbf{第 1 层，散斑随机误差}：仿真的每个随机海面实现对应一条含散斑的单次回波，对 24 个实现逐条反演，以反演值的标准差度量随机误差量级，并以 bootstrap 平均实验考察多视平均的压制效果；
+	\item \textbf{第 2 层，近海畸变系统误差}：对 3.5 节沙滩/礁石/岛屿复合场景的系综平均波形反演，与各自干净海面基线相减得到污染引起的系统偏差，并由拟合残差的变化构造波形质量判据；
+	\item \textbf{第 3 层，模型失配误差}：用不含长波倾斜的模型处理含倾斜系综波形，并作等效误指向角扫描，评估模型假设偏差引起的反演误差。
+\end{enumerate}
+
+数据源为两类：一是第 \ref{chap:simulation} 章的仿真波形（三档风速各 24 个实现，以及近海复合场景扫描），海况与污染程度受控，用于误差的机理归因与量级标定；二是 Jason-3 SGDR-T 实测波形（cycle 603 pass 147，闽浙沿岸，2025-07-22），用于检验上述结论在真实数据上的表现，并以 SGDR 产品 MLE4 反演结果为外部基准。
 
 \subsection{散斑随机误差与多视平均收敛}
 \label{sec:speckle-error}
-\hongzifuzhu{写什么：24 实现逐条反演的 SSH/SWH std（SWH 1.6--10 cm、SSH 0.2--1.1 cm）；bootstrap 平均门数实验，收敛律 ~1/√N（对应 20 Hz→1 Hz 平均）；阈值法 SWH 散斑约为拟合法 1.5 倍。}
-\hongzifuzhu{配图：fig2\_speckle\_error.png。}
+单次回波波形的散斑来自足印内大量面元散射的随机叠加，表现为单条波形的剧烈起伏（3.3 节）。本节对三档海况各 24 个独立实现逐条反演，以反演结果的标准差度量散斑随机误差。单实现下 SWH 反演标准差为 1.7/4.5/10.2 cm（$U_{19.5} = 8/12/16$ m/s），SSH 反演标准差为 0.16/0.42/1.06 cm，均随海况增强而增大——海况越高，波形的可用前缘信息占比越低。
+
+多视平均是压制散斑的标准手段：对 $k$ 个独立实现平均后再反演，bootstrap 实验（每情形 100 次重采样）表明标准差按 $k^{-1/2}$ 收敛（\reffig{fig:speckle}）：平均 16 个实现（对应 20 Hz 波形平均至 1 Hz 量级）后，SWH 散斑降至 0.25/0.70/1.70 cm，SSH 降至 0.02/0.06/0.15 cm。两类反演方法的散斑水平随海况的相对关系不同：低海况时阈值法散斑（0.74 cm）小于拟合法（1.65 cm）；中高海况时阈值法升至 6.2/16.9 cm，约为拟合法的 1.4/1.7 倍——阈值宽度仅由前沿两侧的两个跨越点决定，高海况前沿展宽时其定位涨落被放大。总体上，散斑属随机误差，多视平均可有效压制，是三层误差中最易处理的一项。
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.98\textwidth]{fig2_speckle_error.png}
+	\caption{第 1 层散斑随机误差（bootstrap $\times$ 100）。（左）SWH 反演标准差随平均实现数的收敛（虚线为 $1/\sqrt{N}$ 参考）；（右）SSH 反演标准差收敛}
+	\label{fig:speckle}
+\end{figure}
 
 \subsection{近海畸变系统误差与波形质量判据}
 \label{sec:nearshore-error}
-\hongzifuzhu{写什么：沙滩占比/礁石/岛屿各场景的 ΔSSH/ΔSWH 偏差（礁石@天底点 +40 cm、岛屿@天底点 +78 cm、沙滩占比≥60\% 时 −53 cm）；核心发现——拟合残差 RMS 随污染激增（1.2\%→7.4\%），可作波形质量自动判据。}
-\hongzifuzhu{配图：fig3\_nearshore\_bias.png。}
+以 3.5 节近海复合场景的系综平均波形为对象，反演结果相对各自干净海面基线的偏差即近海畸变引起的系统误差（基线口径与各自波形一致：沙滩为标准窗，礁石/岛屿为宽窗）。全部 12 个场景的偏差与拟合残差列于\reftab{tab:nearbias}，\reffig{fig:nearbias} 给出偏差随污染程度与位置的变化。
+
+礁石（2 km 方形，海拔 $+2$ m）：位于天底点时，其超前 13.3 ns 且强于海面的回波与海面前沿重叠，使前沿中点前移，SSH 偏差为 $+40.8$ cm（拟合法）与 $+47.8$ cm（阈值法），波形宽度被压缩使 SWH 偏差 $+70.2$ cm。礁石移至 2.2 km 后回波与前沿部分分离，拟合综合调整后 SSH 偏差 $-14.4$ cm；4.4 km 及更远处礁石回波移出采样窗，偏差回落到 0.5 cm 以内。
+
+岛屿（半径 1.5 km，海拔 $+12$ m）：回波弱于海面（$-12$ dB 量级）但提前达 80 ns。位于天底点时提前回波使前沿整体前移，SSH 偏差 $+78.5$ cm，为全部场景之最；值得注意的是该情形拟合残差仅 1.3\%（不高于基线水平）——岛屿回波与前沿融合后波形仍近似 Brown 形，模型以整体平移吸收畸变，“平移型”污染不产生形状剩余，说明单靠残差判据会漏检此类偏差最大的情形。岛屿移至 2.2 km 时，提前回波落在波形中后段，前沿位置基本不受影响，但宽度指标被显著抬高，SWH 偏差 $+1.98$ m，为全部场景之最。
+
+沙滩条带（远岸侧，面积占比 0--80\%）：污染自足印远区开始（3.5 节“远区先变”）。占比 20\% 时偏差尚小（$\Delta$SSH $+1.1$ cm、$\Delta$SWH $-9.1$ cm）；占比 40\% 时尾部被高 $\sigma^0$ 沙滩回波填充，拟合结构变化使 $\Delta$SSH 升至 $+11.5$ cm、$\Delta$SWH $+57.9$ cm；占比 60\% 时沙滩侵入天底附近，前沿被拖尾改变，$\Delta$SSH 反转为 $-53.4$ cm，$\Delta$SWH 达 $-1.13$ m；占比 80\% 时偏差趋于饱和（$-51.7$ cm、$-1.11$ m）。
+
+干净海面基线的拟合残差为 1.2\%，污染场景普遍升至 2\%--7.4\%（礁石位于天底点时最高），残差随污染程度总体增大（\reffig{fig:nearbias} 右下）。因此拟合残差可作为近海波形质量的自动判据：以超过开阔海基线 2 倍（图中虚线）为门限即可识别多数污染波形，门限的选取主要权衡对干净波形散斑的误报与对轻污染的漏报。结合岛屿天底点的反例，该判据应定位为“污染指示器”而非完备方案——对整体平移型畸变需辅以沿轨一致性等其他信息。此外，阈值法在强污染场景下会严重失效：礁石/岛屿位于部分位置时其 SWH 偏差达 $+4.7$ m 与 $+6.2$ m，这是仅依赖前沿几何特征的反演器缺乏抗污染能力的直接证据。
+
+\begin{table}[htpb]
+	\centering
+	\caption{近海复合场景反演偏差汇总（拟合法，$U_{19.5} = 8$ m/s；开阔海基线残差 1.2\%）}
+	\label{tab:nearbias}
+	\song\wuhao
+	\begin{tabular}{lccc}
+		\toprule
+		场景（位置） & $\Delta$SSH (cm) & $\Delta$SWH (cm) & 拟合残差 (\%) \\
+		\hline
+		沙滩条带 20\% & $+1.1$ & $-9.1$ & 1.9 \\
+		沙滩条带 40\% & $+11.5$ & $+57.9$ & 3.0 \\
+		沙滩条带 60\% & $-53.4$ & $-113.2$ & 3.2 \\
+		沙滩条带 80\% & $-51.7$ & $-111.1$ & 2.4 \\
+		礁石（$+2$ m）天底点 & $+40.8$ & $+70.2$ & 7.4 \\
+		礁石 2.2 km & $-14.4$ & $+47.4$ & 4.5 \\
+		礁石 4.4 km & $+0.4$ & $+5.5$ & 2.2 \\
+		礁石 8.8 km & $+0.5$ & $+1.2$ & 1.5 \\
+		岛屿（$+12$ m）天底点 & $+78.5$ & $+44.8$ & 1.3 \\
+		岛屿 2.2 km & $+29.7$ & $+197.5$ & 4.6 \\
+		岛屿 4.4 km & $-4.3$ & $-56.6$ & 3.3 \\
+		岛屿 6.6 km & $-3.7$ & $-47.0$ & 2.5 \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{fig3_nearshore_bias.png}
+	\caption{近海畸变系统误差（$U_{19.5} = 8$ m/s）。（左上）沙滩条带占比扫描；（右上、左下）礁石与岛屿位置扫描的 $\Delta$SSH/$\Delta$SWH；（右下）各场景 Brown 拟合残差与开阔海基线（虚线为基线 2 倍）}
+	\label{fig:nearbias}
+\end{figure}
 
 \subsection{模型失配误差}
 \label{sec:mismatch-error}
-\hongzifuzhu{写什么：长波倾斜波形用无倾斜模型反演的偏差（ΔSSH +0.25 cm / ΔSWH −0.32 cm，可忽略）；等效误指向角扫描；结论：对本文仿真口径，模型失配远小于近海畸变项。}
+含长波倾斜的诊断场景（在两尺度口径上额外计及长波倾斜对局部入射角与 $\sigma^0$ 的调制，属二阶效应）用不含倾斜的拟合模型处理。拟合波形与含倾斜系综几乎重合，反演偏差为 $\Delta$SSH $= +0.25$ cm、$\Delta$SWH $= -0.32$ cm（\reffig{fig:mismatch-wind} 左），比近海畸变项小两个数量级以上；对倾斜波形的等效误指向角扫描在 $\xi = 0.00^\circ$ 处取最小残差（1.29\%，与固定 $\xi = 0$ 时相同），未发现可检测的倾斜--误指向等效效应。结论：对本文仿真口径，模型失配误差在近海误差预算中可忽略。
 
 \subsection{Jason-3 实测数据对照验证}
 \label{sec:jason3-validation}
-\hongzifuzhu{写什么：数据说明（SGDR-T，cycle 603 pass 147，闽浙沿岸，2025-07-22）；开阔海（离岸>40 km）200 条 20 Hz 波形 Hayne 拟合 vs SGDR MLE4 产品：bias −0.14 m、RMS 0.77 m、相关 0.95；近海（0--10 km）拟合残差中位 10.9\% vs 开阔海 8.1\%——实测印证第 2 层“残差判据”。}
-\hongzifuzhu{配图：fig5\_jason3\_validation.png；可加 Data\_Reading 的轨迹/波形图辅助。}
+以 Jason-3 SGDR-T 产品 cycle 603 pass 147（闽浙沿岸，2025-07-22）的 20 Hz Ku 波段波形检验反演链路在真实数据上的表现：波形去除热噪声本底（前 8 门均值）后逐条作 Hayne 拟合。开阔海（地表分类为海面、离岸大于 40 km）有效样本 158 条，反演 SWH 与 SGDR MLE4 产品值的对比如\reffig{fig:j3}（左）：bias $= -0.21$ m，RMS $= 1.07$ m，相关系数 0.88。散点沿 1:1 线分布，高海况段吻合较好，低海况段（产品 SWH 小于 1.5 m）反演值集中在 1.2--1.5 m 附近。单条 20 Hz 波形的该散布主要来自实测波形的散斑与噪声（本文采用简化的噪声本底估计与解析模型的远尾近似），以及低海况下波形对 $\sigma_h$ 似然平坦带来的估计下限；该精度对应单波形水平，不与多视平均后的产品级精度直接比较。
+
+残差判据在实测数据中的表现见\reffig{fig:j3}（右）：开阔海波形的拟合残差中位为 8.4\%，0--10 km 近海段中位升至 10.9\%。沿轨分布显示，离岸 1 km 内残差普遍高出基线 5 个百分点以上，2--6 km 区间出现多次残差尖峰（最高约 21\%），对应间歇性的陆地污染——与第 2 层仿真结论（残差随污染增强）一致，实测印证了以拟合残差识别近海污染波形的有效性。
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.98\textwidth]{fig5_jason3_validation.png}
+	\caption{Jason-3 c603p147 闽浙沿岸实测对照。（左）开阔海 158 条 20 Hz 波形 Hayne 反演 SWH 与 SGDR MLE4 产品对比；（右）近海段拟合残差沿离岸距离的变化（绿色虚线为开阔海中位基线）}
+	\label{fig:j3}
+\end{figure}
 
 \subsection{误差综合讨论}
 \label{sec:error-synthesis}
-\hongzifuzhu{写什么：把三层误差放在一张总表/总图中对比量级，给出“近海误差预算”：散斑（随机，可平均压制）vs 近海畸变（系统，需判据剔除）vs 模型失配（本文口径可忽略）；讨论对近海高度计产品应用的启示（离岸距离多少 km 内不可信、残差判据的工程用法）。}
+三层误差的量级与处置方式汇总于\reftab{tab:errorbudget}。
+
+\begin{table}[htpb]
+	\centering
+	\caption{三层误差量级汇总与处置}
+	\label{tab:errorbudget}
+	\song\wuhao
+	\begin{tabular}{p{1.4cm}p{3.6cm}p{4.3cm}p{3.9cm}}
+		\toprule
+		误差层 & 来源 & 量级 & 特性与处置 \\
+		\hline
+		1 散斑 & 足印内散射元随机叠加 & SWH 1.7--10.2 cm、SSH 0.16--1.06 cm（单实现）；平均 16 实现后降至 1.7 cm、0.15 cm 以下 & 随机误差，多视平均按 $1/\sqrt{N}$ 压制 \\
+		2 近海畸变 & 陆地回波混入、提前回波 & $\Delta$SSH $-53 \sim +79$ cm，$\Delta$SWH $-1.13 \sim +1.98$ m & 系统偏差，随污染增强；拟合残差可指示（平移型漏检） \\
+		3 模型失配 & 长波倾斜、误指向角 & $\Delta$SSH $+0.25$ cm，$\Delta$SWH $-0.32$ cm，$\xi_{\mathrm{eq}} \approx 0$ & 本文仿真口径下可忽略 \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+除三层误差外，反演链路还存在一项与三层误差相互独立的方法学系统差：如 \ref{sec:sim-validation} 节所述，Brown/Hayne 形状模型拟合 PM 仿真系综波形时，SWH 存在约 16\% 的系统性低估（三档海况一致）；相对地，阈值宽度法的系综偏差为 $-3.0\% \sim +7.6\%$，明显更小。其来源是归一化 PM 长波海面的波高概率密度在端部偏离高斯假设、前缘之前的提前回波偏强约 1\%，形状模型为匹配该结构而低估宽度；该项不随多视平均消除，在参数绝对标定时需要标定修正。
+
+由此得到近海误差预算的基本图景：近海反演精度的主导项是第 2 层畸变系统误差（最大达数十厘米至米级），它随污染程度增长且无法靠平均压制；散斑随机误差经多视平均后可降至厘米级；模型失配在本文口径下可忽略。对近海高度计产品应用的含义：（1）离岸约 10 km 内的波形需逐条甄别，标准海洋波形反演器在污染波形上会产生不可忽略的 SSH/SWH 偏差，偏差的方向与量级取决于地物类型、海拔与位置；（2）拟合残差可作为波形质量的简洁自动判据（门限取开阔海基线的 2 倍），但对整体平移型污染需保持警惕；（3）对必须保留近海观测的应用，可按残差判据标记、降权或剔除污染波形，或利用本文的场景偏差表作量级参考下的偏差订正。
 
 \sectionbreak
 
@@ -907,11 +1071,29 @@ Hayne\cite{hayne1980}对式 \eqref{eq:brown} 作二阶近似解析展开（本�
 \section{总结与展望}
 \label{chap:conclusion}
 
+本章总结全文工作与主要结论，并讨论本文的不足与后续研究方向。
+
 \subsection{全文总结}
-\hongzifuzhu{写什么：对应绪论的“主要工作”逐条总结，每条给最有代表性的量化结论。}
+本文围绕卫星雷达高度计近海回波畸变引起的海洋参数反演误差，开展了仿真、反演与误差分析的系统研究，主要结论如下：
+
+（1）建立了基于 PM 方向谱海面的逐面元时域回波仿真模型，并以 Brown 模型作同口径数值对照：三档海况下仿真与 Brown 数值模型的前沿区偏差 RMS 不超过 0.8\%、平台功率比偏差不超过 0.3\%，验证了仿真链路的正确性；近海沙滩/礁石/岛屿复合场景仿真再现了尾窗污染、提前回波与弱回波叠加三类典型畸变形态，并给出了盐度/温度对回波幅度的敏感性结论（第 \ref{chap:simulation} 章）。
+
+（2）实现了阈值法、Brown 数值拟合与 Hayne 二阶解析模型三种重跟踪反演器：Hayne 解析模型与数值 Brown 模型全窗 RMS 偏差 1.7\%、前沿与平台区小于 0.5\%；$\sigma^0$--风速闭环反演与真值偏差不超过 0.02 m/s（第 \ref{chap:retracking} 章）。
+
+（3）构建了三层误差分析框架并给出近海误差预算：单实现散斑随机误差为 SWH 1.7$\sim$10.2 cm、SSH 0.16$\sim$1.06 cm，多视平均按 $1/\sqrt{N}$ 压制；近海畸变系统误差最大达 SSH $+78.5$ cm（岛屿位于天底点）与 SWH $+1.98$ m（岛屿距天底点 2.2 km），且拟合残差随污染升高至开阔海基线的 6 倍（1.2\%$\to$7.4\%），可作波形质量判据；模型失配误差在本文仿真口径下可忽略（$\Delta$SSH $+0.25$ cm）（第 \ref{chap:error} 章）。
+
+（4）以 Jason-3 实测数据验证反演链路与误差结论：开阔海 158 条 20 Hz 波形 SWH 反演与 SGDR MLE4 产品对照 bias $-0.21$ m、RMS 1.07 m、相关系数 0.88；近海段拟合残差中位 10.9\% 高于开阔海 8.4\%，实测印证了残差判据（第 \ref{chap:error} 章）。
 
 \subsection{不足与展望}
-\hongzifuzhu{可写：低风速（U19.5<6 m/s）两尺度分解未实现；仅 Ku 波段单一频点；SAR 模式（Delay-Doppler）未涉及；实测仅一条弧段一个 cycle；ξ 联合拟合不可辨识问题的更深入研究等。}
+本文工作仍存在以下不足，也是后续工作的方向：
+
+（1）仿真海况范围受限：两尺度口径在低风速（$U_{19.5} < 6$ m/s）下有限网格的方差解析比例过低，未实现显式两尺度分解，低海况仿真需要更精细的谱分解方案；
+
+（2）频段与体制单一：仅覆盖 Ku 波段传统脉冲有限体制，未涉及 Ka 波段与延迟-多普勒（SAR）体制；后者足印更小、方位向分辨率更高，其近海畸变特征值得单独研究\cite{raney1998}；
+
+（3）实测验证范围有限：仅使用单个 cycle、单条弧段（闽浙沿岸）的 Jason-3 数据，且以 SGDR 产品而非独立现场数据（浮标、验潮站）为基准，结论的普适性需更多区域与数据的检验\cite{vignudelli2011}；
+
+（4）误差修正方法有待深化：误指向角与波形宽度参数在单波形上不可辨识，本文仅作诊断式估计，联合沿轨多波形与波形形状先验的约束方式值得进一步研究；此外，可将本文的场景偏差表与残差判据集成为工程化的近海波形质量标志与偏差订正模块。
 
 \sectionbreak
 
