@@ -130,8 +130,8 @@
 \usepackage{caption}
 \captionsetup[figure]{labelformat=default, labelsep=quad,name={图}}
 \captionsetup[table]{labelformat=default,labelsep=quad,name={表}}
-\renewcommand{\thefigure}{\ifnum \thesection>0 \thesection-\fi \arabic{figure}}
-\renewcommand{\thetable}{\ifnum \thesection>0 \thesection-\fi \arabic{table}}
+\renewcommand{\thefigure}{\ifnum \value{section}>0 \thesection-\fi \arabic{figure}}
+\renewcommand{\thetable}{\ifnum \value{section}>0 \thesection-\fi \arabic{table}}
 \DeclareCaptionFont{mylabelfont}{\hei\xiaosihao}
 \captionsetup[figure]{font=mylabelfont}
 \captionsetup[table]{font=mylabelfont}
@@ -148,6 +148,7 @@
 \usepackage{makecell}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta, positioning}
+\usepackage{longtable}
 \newcolumntype{L}{X}
 \newcolumntype{C}{>{\centering \arraybackslash}X}
 \newcolumntype{R}{>{\raggedright \arraybackslash}X}
@@ -440,9 +441,52 @@
 	r(t) \approx \sqrt{c\, t\, H}
 	\label{eq:ring}
 \end{equation}
-当脉冲受限足印远小于波束足印，即 $\sqrt{H c\, \tau_p} \ll H \tan\theta_b$（$\theta_b$ 为半波束宽度）时，回波能量由脉冲受限环主导，称为脉冲有限（pulse-limited）体制。以 Jason-3 为例（$H = 1336$ km，$\theta_b = 1.1^\circ$）：脉冲受限初始足印半径 $\sqrt{H c\, \tau_p} \approx 1.1$ km，远小于 3 dB 波束足印半径 $H \tan\theta_b \approx 25.7$ km，属于典型的脉冲有限体制；其 Ku 波段（13.575 GHz）波形按 104 个距离门、门间隔 3.125 ns 采样，采样窗覆盖环半径从天底扩张至约 10 km 的过程（系统参数详见\reftab{tab:params}）。
+当脉冲受限足印远小于波束足印，即 $\sqrt{H c\, \tau_p} \ll H \tan\theta_b$（$\theta_b$ 为半波束宽度）时，回波能量由脉冲受限环主导，称为脉冲有限（pulse-limited）体制。以 Jason-3 为例（$H = 1336$ km，$\theta_b = 1.1^\circ$）：脉冲受限初始足印半径 $\sqrt{H c\, \tau_p} \approx 1.1$ km，远小于 3 dB 波束足印半径 $H \tan\theta_b \approx 25.7$ km，属于典型的脉冲有限体制；其 Ku 波段（13.575 GHz）波形按 104 个距离门、门间隔 3.125 ns 采样，采样窗覆盖环半径从天底扩张至约 10 km 的过程（系统参数详见\reftab{tab:params}；测高几何与照明环扩张示意见\reffig{fig:geometry}）。
 
-\hongzifuzhu{TODO：此处建议补一幅测高几何与脉冲有限足印扩张示意图（卫星—海面几何 + 不同时刻照明环），Visio/TikZ 画。}
+\begin{figure}[H]
+	\centering
+	\resizebox{\textwidth}{!}{%
+	\begin{tikzpicture}[font=\wuhao]
+		% ---------- (a) 侧视几何 ----------
+		\begin{scope}
+			\node[draw, fill=gray!20, minimum width=7mm, minimum height=4mm] at (0,4.62) {};
+			\node[above] at (0,4.85) {卫星};
+			\draw[dashed] (0,4.5) -- (-2.3,0);
+			\draw[dashed] (0,4.5) -- (2.3,0);
+			\draw[<->] (3.0,4.5) -- (3.0,0) node[midway, right] {$H$};
+			\draw[thick] (-3.2,0) -- (3.2,0);
+			\node[below left] at (-3.2,0) {平均海面};
+			\fill (0,0) circle (0.06);
+			\node[below left] at (-0.05,0) {天底点};
+			\draw[<->] (0,-0.85) -- (2.3,-0.85) node[midway, below] {$H\tan\theta_b$};
+			\draw[dashed] (2.3,0) -- (2.3,-0.85);
+			\draw[dashed] (0,0) -- (0,-0.85);
+			\draw (0,4.5) ++(-62.9:1.35) arc (-62.9:-117.1:1.35);
+			\node at (0,2.9) {$\theta_b$};
+			\node[below] at (0,-1.5) {(a) 卫星—海面几何};
+		\end{scope}
+		% ---------- (b) 俯视: 照明环扩张 ----------
+		\begin{scope}[xshift=8.6cm, yshift=-0.35cm]
+			\fill[blue!12] (0,0) circle (0.38);
+			\draw[blue!60] (0,0) circle (0.38);
+			\draw[dashed] (0,0) circle (1.0);
+			\draw[dashed] (0,0) circle (1.6);
+			\draw[dashed] (0,0) circle (2.2);
+			\draw[red!70, thick, dashed] (0,0) circle (2.75);
+			\fill (0,0) circle (0.05);
+			\node[blue!70] at (0,0.68) {初始足印};
+			\node at (0.97,0.97) {$t_1$};
+			\node at (1.48,1.48) {$t_2$};
+			\node at (1.93,1.93) {$t_3$};
+			\node[red!70] at (2.45,3.2) {波束足印};
+			\draw[red!70, ->] (2.35,3.1) -- (2.0,2.45);
+			\draw[<->] (0,0) -- (0.72,1.3) node[midway, above left] {$r(t)$};
+			\node[below] at (0,-3.35) {(b) 照明环随时间扩张，$r(t) \approx \sqrt{c\,t\,H}$};
+		\end{scope}
+	\end{tikzpicture}}
+	\caption{测高几何与脉冲有限足印扩张示意图。（a）卫星—海面几何、波束半角 $\theta_b$ 与波束足印半径；（b）俯视：脉冲受限照明环自天底点随时间扩张}
+	\label{fig:geometry}
+\end{figure}
 
 天线方向图采用高斯功率模型
 \begin{equation}
@@ -576,7 +620,7 @@ Hayne\cite{hayne1980}对式 \eqref{eq:brown} 作二阶近似解析展开（本�
 
 本文以 Jason-3 卫星雷达高度计为仿真对象。其 Ku 波段（13.575 GHz）天线 3 dB 波束宽度为 2.2$^\circ$，对应轨道高度（1336 km）上天底点 $-3$ dB 足印半径约 25.7 km；而压缩后脉冲宽度对应的空间尺度仅约 0.47 m，远小于波束足印，属于典型的脉冲有限（pulse-limited）体制。脉冲有限体制下，平均回波由“脉冲受限环”自天底点随时间向外扩张的响应主导，这正是 Brown 模型\cite{brown1977}描述的物理图像（详见第 2 章）。
 
-仿真按如下四个环节进行，各环节的数学模型分别在 3.2 与 3.3 节给出：
+仿真流程如\reffig{fig:simflow}所示，按四个环节进行，各环节的数学模型分别在 3.2 与 3.3 节给出：
 \begin{enumerate}
 	\item \textbf{海面生成}：由二维 PM 方向谱经 FFT 线性滤波生成随机海面高度场 $\eta(x, y)$；
 	\item \textbf{逐面元散射}：将海面离散为边长 $\mathrm{d}x$ 的方形面元，按几何光学（GO）近似计算面元后向散射系数 $\sigma^0$，并由雷达方程计算其回波功率贡献；
@@ -612,7 +656,28 @@ Hayne\cite{hayne1980}对式 \eqref{eq:brown} 作二阶近似解析展开（本�
 	\end{tabular}
 \end{table}
 
-\hongzifuzhu{TODO：此处可补一幅仿真流程框图（海面生成→散射→分箱→系统响应→系综平均），用 Visio/TikZ 画。}
+\begin{figure}[H]
+	\centering
+	\resizebox{0.92\textwidth}{!}{%
+	\begin{tikzpicture}[
+		font=\wuhao,
+		box/.style={draw, rounded corners=1.2mm, align=center, minimum height=8mm, inner xsep=5pt, fill=blue!4},
+		arrow/.style={-{Stealth[length=2mm]}, thick}
+	]
+		\node[box, fill=gray!12] (pm) {海面生成\\（PM 谱 + FFT 滤波）};
+		\node[box, right=6mm of pm] (sc) {逐面元散射\\（GO 模型 + 雷达方程）};
+		\node[box, right=6mm of sc] (bin) {延迟分箱\\（按双程延迟 $\tau = 2R/c$）};
+		\node[box, below=9mm of bin] (ptr) {系统响应\\（PTR 卷积 + 门积分）};
+		\node[box, left=6mm of ptr] (ens) {系综平均\\（$M$ 个独立实现）};
+		\draw[arrow] (pm) -- (sc);
+		\draw[arrow] (sc) -- (bin);
+		\draw[arrow] (bin) -- (ptr);
+		\draw[arrow] (ptr) -- (ens);
+		\draw[arrow, dashed] (ens.south) -- ++(0,-0.65) -| node[pos=0.25, below] {独立海面 $\times M$} (pm.west);
+	\end{tikzpicture}}
+	\caption{近海回波波形仿真流程（对 $M$ 个独立随机海面实现重复上述过程并取系综平均）}
+	\label{fig:simflow}
+\end{figure}
 
 \subsection{PM 方向谱随机海面的生成}
 \label{sec:pm-surface}
@@ -1099,7 +1164,18 @@ Hayne 二阶解析模型拟合采用文献 \cite{refpaper} 式 (5.7)--(5.15) 的
 
 % ------------------------------------ 致谢 ------------------------------------ %
 \begin{thankpage}
-	\hongzifuzhu{致谢：导师、学院/实验室、同学家人，200--300 字。}
+	\seccontent
+	光阴荏苒，四年的本科生活即将画上句号。我也即将离开华中科技大学这片学术研究的热土，开启人生新的篇章。值此论文完成之际，谨向所有关心和帮助过我的老师、同学、朋友与家人致以诚挚的谢意。
+
+	首先感谢我的导师田加胜副教授。确定研究方向时，我对近海区域雷达高度计回波的复杂性估计不足，是导师建议我从 Brown--Hayne 模型的理想波形出发，逐步引入 PM 谱粗糙海面散射与 Ice-2 重跟踪算法，才形成了本文的技术路线。在卫星雷达高度计回波仿真阶段，导师对我 MATLAB 程序的运行结果进行了校验并指出问题所在，使我在后续海陆复合面仿真中迅速定位了多次参数设置错误。论文中粗糙海面风速 4 m/s 与 9 m/s 的对比实验，以及海陆比从 0\% 逐级调节至 40\% 时的回波变化曲线，都是在导师对模型适用边界的提醒下完成的。导师严谨的治学态度与耐心的指导，使我受益良多。
+
+	感谢电子信息与通信学院刘干副教授在我配置 Ubuntu 22.04 虚拟机与 WSL 时提供的帮助。感谢本科辅导员赵广超老师，在我学习与生活最艰难的时期给予我支持与鼓励。感谢我的朋友李弘禹和甘霖分享 Overleaf 排版经验，尤其是公式字体与正文的排版方法，使我减少了许多格式调整上的重复劳动。
+
+	感谢我的父母含辛茹苦将我养育成人。攻读学士学位期间，你们为了不让我奔波千里，常在节假日来看望你们的孩子；你们用一分一分的辛劳与血汗将我养育成人。如果不是你们告诉我要努力学习、改变自己的人生，我可能仍漂泊在成都街头，只有中专学历，过着比现在艰苦许多、每天都要为衣食住行发愁的生活。谢谢你们！
+
+	我还想特别感谢一位在高铁上遇见的陌生人。是你在我仍苦苦手工誊写公式时，教会我在电脑上使用 LaTeX 撰写文档，并告诉我如何借助 AI 大模型提升工作效率；也感谢微信、小红书等平台上各类 AI 公众号。从前的我写报告只会手写，遇到不会的东西（如编写 Python 脚本）很难在短时间内搜集资料并学会。在人工智能飞速发展的当下，我通过网络平台关于 Claude Code、Codex、ZCode 等产品的安装与应用文章，在自己的电脑上成功接入以 DeepSeek V4-flash、GLM-5.1 等为代表的 API 程序，让人工智能大模型能直接协助我完成各种以前看似“永远”无法完成的工作。短短一两个月间，我的学习生活发生了翻天覆地的变化：工作效率从“因为不会且没有资源去学习晦涩难懂的知识而无法完成”，变为“给我这些材料，我可以用 Agent 帮助我学习，并用 Agent 完成给定任务”。AI 在短期内让我的综合能力得到了质的提升！
+
+	最后，我还想感谢我的对象。在遇见她之前，我一直以为自己没有什么优点；是她发现了我的长处，在我遇到困难时一直鼓励我，在我不知道如何使用文档工具或其他操作软件时为我提供建议与指导。她像黑暗中的一缕阳光照进了我的生活。谢谢你的陪伴！
 \end{thankpage}
 
 % ----------------------------------- 参考文献 ----------------------------------- %
@@ -1156,16 +1232,81 @@ Hayne 二阶解析模型拟合采用文献 \cite{refpaper} 式 (5.7)--(5.15) 的
 \end{thebibliography}
 
 % ------------------------------------ 附录 ------------------------------------ %
-\clearpage
 \appendix
 \phantomsection
 \addcontentsline{toc}{section}{附录}
 \section*{附录}
 
 \subsection*{附录 A\quad 主要符号表}
-\hongzifuzhu{按出现顺序列：η(x,y)、$U_{19.5}$、$\sigma_h$、SWH、SSH、$\sigma^0$、ρ、ε、B、$t_0$、ξ 等符号与含义对照。}
+\seccontent
+
+{\song\wuhao
+\begin{longtable}{p{3.4cm}p{10.4cm}}
+	\toprule
+	符号 & 含义 \\
+	\hline
+	\endhead
+		$H$ & 卫星轨道高度（1336 km） \\
+		$c$ & 光速 \\
+		$\lambda$ & 雷达波长（2.21 cm） \\
+		$B$ & 接收机带宽（320 MHz），$\tau_p = 1/B$ 为压缩脉冲宽度 \\
+		$P_t$ & 峰值发射功率 \\
+		$G(\theta)$ & 天线双程功率方向图（高斯近似，宽度参数 $\sigma_\theta$，$\gamma = 4\sigma_\theta^{2}$） \\
+		$\theta_b$ & 天线半波束宽度（3 dB 波束 $2.2^\circ$） \\
+		$R$、$\tau$ & 面元斜距与双程延迟（$\tau = 2R/c$） \\
+		$\eta(x,y)$ & 随机海面高度场（由 PM 谱经 FFT 线性滤波生成） \\
+		$U_{19.5}$、$U_{10}$ & 海面 19.5 m / 10 m 高度处风速 \\
+		$W(k_x,k_y)$ & 二维 PM 方向谱 \\
+		$\sigma_h$ & 海面均方根高度 \\
+		$\mathrm{SWH}$ & 有效波高（$\mathrm{SWH} = 4\sigma_h$） \\
+		$\gamma_{\mathrm{cap}}$ & 有限网格的谱方差解析比例 \\
+		$\sigma^0(\theta,\phi)$ & 单位散射面积后向散射截面（几何光学模型） \\
+		$\rho$ & 海水法向菲涅尔反射率 \\
+		$\varepsilon(S,T,f)$ & 海水相对复介电常数（Debye 模型） \\
+		$s_u^{2}$、$s_c^{2}$ & 顺风向 / 交叉风向海面斜率方差（Cox--Munk 关系） \\
+		$\phi_v$ & 风向方位角 \\
+		$W(t)$ & 平均回波功率波形 \\
+		$P_{\mathrm{FS}}(t)$ & 平均平坦海面冲激响应 \\
+		$q_s(t)$ & 海面波高概率密度函数（$\lambda_s$ 为波高偏度） \\
+		$S_r(t)$ & 雷达系统点目标响应（高斯等效宽度 $\sigma_p$） \\
+		$\sigma_s$、$\sigma_c$ & 波高展宽与合成波形宽度（$\sigma_c^{2} = \sigma_p^{2} + \sigma_s^{2}$） \\
+		$A$ & 回波幅度因子 \\
+		$t_0$ & 波形前沿半功率点相对参考时延 \\
+		$\xi$ & 天线误指向角 \\
+		$\mathrm{SSH}$ & 海面高度（$h_{\mathrm{SSH}} = h_{\mathrm{orb}} - R - \sum_i \Delta h_i$） \\
+		$W_{10\text{--}90}$、$t_{\mathrm{ref}}$ & 阈值法前沿 10\%--90\% 宽度与零波高参考时延 \\
+	$\Delta\mathrm{SSH}$、$\Delta\mathrm{SWH}$ & 相对干净海面基线的反演偏差 \\
+	\bottomrule
+\end{longtable}}
 
 \subsection*{附录 B\quad 程序清单说明}
-\hongzifuzhu{三个代码模块（Data\_Reading / Echo\_Simulation / Retracking）各文件功能一览表，注明仓库地址。}
+\seccontent
+本文程序分为三个代码模块，各模块主要文件及功能见下表。程序基于 Python 3.14（numpy、scipy、matplotlib、h5py）实现，源码与说明文档见开源仓库：\url{https://github.com/FrankIvanovic/jason3_nearshore_echo_analysis}。
+
+\begin{table}[H]
+	\centering
+	\song\wuhao
+	\begin{tabular}{p{2.8cm}p{3.8cm}p{7.0cm}}
+		\toprule
+		模块 & 文件 & 功能 \\
+		\hline
+		Data\_Reading & jason3\_reader.py & Jason-3 SGDR-T 读取，波形、地表分类与离岸距离解码 \\
+		 & oifd\_reader.py & OIFD 融合有效波高产品读取 \\
+		 & scan\_nearshore.py & 近海弧段批量扫描（输出 nearshore\_scan.csv） \\
+		 & plot\_track.py 等 & 轨迹、波形与近海专题可视化脚本 \\
+		Echo\_Simulation & pm\_surface.py & PM 谱随机海面生成（FFT 线性滤波与方差补偿） \\
+		 & echo\_kernel.py & 逐面元散射核、延迟分箱与 PTR 卷积 \\
+		 & brown\_model.py & Brown 平均回波数值对照模型 \\
+		 & altimeter\_params.py & 高度计系统参数 \\
+		 & dielectric.py & 海水/陆地介电常数与菲涅尔反射率 \\
+		 & coastal.py & 近海复合场景（沙滩/礁石/岛屿）构建 \\
+		 & run\_ocean\_echo\_sim.py & 海洋回波仿真主脚本 \\
+		 & run\_coastal\_echo\_sim.py & 近海复合场景仿真主脚本 \\
+		Retracking & brown\_fit\_retracker.py & 阈值法（Brown 族标定）、Brown 数值拟合与 $\sigma^0 \to$ 风速反演 \\
+		 & hayne\_model.py & Hayne 二阶解析模型与最小二乘拟合 \\
+		 & run\_error\_analysis.py & 三层误差分析主脚本（第 \ref{chap:error} 章全部图表来源） \\
+		\bottomrule
+	\end{tabular}
+\end{table}
 
 \end{document}
