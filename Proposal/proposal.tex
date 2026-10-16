@@ -66,8 +66,7 @@
 \renewcommand{\headrulewidth}{0.4pt}
 
 % ------------------------------ 正文基本样式 -------------------------------- %
-% 正文：小四号宋体，1.5 倍行距，首行缩进 2 字符
-\renewcommand{\baselinestretch}{1.5}
+% 正文：小四号（12 bp），Word 1.5 倍行距（23.4 bp 基线间距）
 \setlength{\parindent}{2em}
 
 % 章节标题：一、二、三…… 小四黑体（与初稿一致，不进目录）
@@ -141,6 +140,7 @@
 % ============================== 正文 ============================== %
 \clearpage
 \setcounter{page}{1}
+\fontsize{12bp}{23.4bp}\selectfont
 
 % -------- 一、课题来源、目的、意义 -------- %
 \sect{一、课题来源、目的、意义}
@@ -187,7 +187,7 @@
 
 \subsect{（四）主要研究内容、完成课题的方案及主要措施}
 
-反演阶段先在纯海面样本上建立阈值法的前沿定位和宽度标定，再以 Brown/Hayne 类模型拟合波形的时延、展宽和幅度。利用相同输入波形比较不同算法，避免场景差异掩盖方法差异。误差分析分三层进行：其一，对随机海面多次实现逐条反演，评估散斑引起的离散程度及平均门数的作用；其二，把各近海场景与对应纯海面基线比较，量化海陆混合造成的系统偏差；其三，改变长波倾斜、散射参数或拟合模型，考察模型失配。对异常波形记录拟合残差、峰值位置和前沿连续性，尝试基于这些量筛选或选择重跟踪器，并检验筛选前后有效率与误差的权衡。
+反演阶段先在纯海面样本上建立阈值法的前沿定位和宽度标定，再以 Brown 和 Hayne 类模型拟合波形的时延、展宽和幅度。利用相同输入波形比较不同算法，避免场景差异掩盖方法差异。误差分析分三层进行：其一，对随机海面多次实现逐条反演，评估散斑引起的离散程度及平均门数的作用；其二，把各近海场景与对应纯海面基线比较，量化海陆混合造成的系统偏差；其三，改变长波倾斜、散射参数或拟合模型，考察模型失配。对异常波形记录拟合残差、峰值位置和前沿连续性，尝试基于这些量筛选或选择重跟踪器，并检验筛选前后有效率与误差的权衡。
 
 验证采用“理论模型—数值仿真—实测数据”三方对照。理论模型检验程序物理与数值实现；仿真提供已知真值，用于区分误差机制；Jason-3 SGDR 波形及其标准产品用于检验近海真实波形的形态和相对改进。条件允许时，以融合有效波高资料或浮标作独立参照，但须先完成时间、空间匹配并标明参照资料自身的不确定性。SSH 比较还须统一轨道、潮汐、大气和海况偏差等改正口径，不能把改正量误差归于波形重跟踪。对同一轨段采用固定的距离分组和异常值规则，并记录每组样本量；在仿真中分别改变单一变量，再考察风速与陆地位置共同变化的情形，以免将交互作用误判为某一参数的独立效应。对于多次随机实现，除均值外给出离散范围，避免由少数波形推断整体精度。最后整理代码、图表与误差预算，明确算法适用的海况及离岸范围。
 
@@ -220,7 +220,7 @@
   \setlength{\itemsep}{0pt}
   \setlength{\parskip}{0pt}
   \interlinepenalty=10000
-  \linespread{1.2}\selectfont\xiaosihao
+  \fontsize{10.5bp}{13.5bp}\selectfont
   \bibitem{brown1977} BROWN G S. The average impulse response of a rough surface and its applications[J]. IEEE Transactions on Antennas and Propagation, 1977, 25(1): 67--74.
   \bibitem{hayne1980} HAYNE G S. Radar altimeter mean return waveforms from near-normal-incidence ocean surface scattering[J]. IEEE Transactions on Antennas and Propagation, 1980, 28(5): 687--692.
   \bibitem{deng2006} DENG X, FEATHERSTONE W E. A coastal retracking system for satellite radar altimeter waveforms: Application to ERS-2 around Australia[J]. Journal of Geophysical Research: Oceans, 2006, 111(C6): C06012. DOI:10.1029/2005JC003039.
