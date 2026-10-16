@@ -4,12 +4,10 @@
 %
 % 版式依据：学校开题报告模板（开题报告（初稿）.doc / .pdf），仿其封面、
 %   填写要求页、正文页眉页脚、进度表与封底评审表重排。
-% 编译方式：XeLaTeX；无目录，编译一遍即可（有交叉引用改动时编译两遍）。
+% 编译方式：XeLaTeX；含文内引用，编译两遍。
 %
-% 骨架说明（撰写阶段内部用，定稿删除）：
-%   - 红色批注 \tbd{...} 标注“这一部分写什么、注意事项”，成稿后删除
-%   - 各部分素材与论文共用：图 ../Echo_Simulation/output/、../Retracking/output/
-%   - 填写要求：理工类 3000 字左右；小四号宋体；A4 双面打印；封面封底浅蓝卡纸
+% 与论文共用的图件目录：../Echo_Simulation/output/、../Retracking/output/
+% 填写要求：理工类 3000 字左右；小四号宋体；A4 双面打印；封面封底浅蓝卡纸
 % ---------------------------------------------------------------------------- %
 
 \documentclass[a4paper]{article}
@@ -53,9 +51,7 @@
 \usepackage{xcolor}
 \usepackage{array}
 \usepackage{multirow}
-
-% 撰写阶段红色批注（定稿删除）
-\newcommand{\tbd}[1]{\par{\color{red}\kai\xiaosihao 【TODO】#1}}
+\usepackage{needspace}
 
 % -------------------------------- header/footer ------------------------------ %
 % 正文页页眉：华中科技大学本科毕业设计（论文）开题报告；页脚：居中页码
@@ -91,6 +87,11 @@
 
 % 参考文献样式（GB/T 7714 顺序编码制；定稿可用 biblatex 或手工 thebibliography）
 \renewcommand{\refname}{\centering\hei\xiaosihao 参考文献}
+
+% 文中参考文献标注采用上标，文末文献表编号保持常规位置
+\makeatletter
+\renewcommand{\@cite}[2]{\textsuperscript{[#1\if@tempswa , #2\fi]}}
+\makeatother
 
 \begin{document}
 
@@ -143,40 +144,55 @@
 
 % -------- 一、课题来源、目的、意义 -------- %
 \sect{一、课题来源、目的、意义}
-\tbd{写什么：课题来源（导师拟定／自选，结合近海测高这一背景）；研究目的（近海波形仿真模型＋重跟踪优化＋误差源定量分析）；研究意义（理论：近海回波建模与误差分析体系；应用：风浪监测、海平面变化、灾害预警的数据支撑）。约 500--600 字，可参考初稿第一部分并按论文最终口径修改。}
+
+卫星雷达高度计通过测量海面回波的往返时延和形状，获取海面高度（SSH）、有效波高（SWH）及海面后向散射系数，并可由后向散射系数估计海面风速。这些参数为海平面变化研究、海况监测和海洋预报提供连续的沿轨观测。近海又是风暴潮、海岸侵蚀和港口航运等问题最需要观测的区域。然而，当雷达足印覆盖海岸、岛礁或浅滩时，海陆散射混合会使波形前沿偏移、尾部出现尖峰或多峰；近岸潮汐、大气等地球物理改正量也可能更难准确获得。按开阔海假设设计的标准重跟踪算法由此可能产生较大偏差，甚至剔除有效观测。
+
+本课题围绕指导教师确定的近海测高研究方向，以 Jason-3 传统脉冲有限雷达高度计为主要对象，建立由随机粗糙海面、后向散射、雷达回波到参数反演的仿真链路，并在海面中加入沙滩、礁石及岛屿等典型近海目标。研究将比较理论平均波形、逐面元仿真波形与实测波形，分析不同海况、陆地位置和散斑噪声如何改变波形及反演结果；再比较阈值定位、Brown 模型拟合和扩展波形模型等重跟踪方法，识别主要误差来源并提出质量控制与修正思路。
+
+课题的理论意义在于把海面统计特性、近海复合散射和反演偏差放在同一物理框架中考察，区分随机波动、场景污染与模型失配造成的误差。应用意义在于为近岸波形筛选、重跟踪算法选择和风浪、海平面产品质量评价提供可复现的试验依据，并为提高近海测高资料在灾害监测中的利用率提供参考。
 
 % -------- 二、国内外研究现况及发展趋势 -------- %
 \sect{二、国内外研究现况及发展趋势}
-\tbd{写什么：国外——Brooks 阈值重构、Deng 波形分类与多阈值、ALBICOCCA／ALTICORE／COASTALT／PISTACH 项目、Lefevre 双参数风速反演、Tournadre 目标探测；国内——鲍李峰 5-$\beta$＋OCOG、Guo 改进阈值、赵健对比重构、杨乐波形分类子波形、神经网络四参数风速反演、“构造波形”方法；发展趋势——近海不可用距离从 20 km 缩至 5 km、SWH 误差 0.2 m 内、风速 RMSE 优于 1.3 m/s，仍有复杂校正量获取与海陆复合散射仿真待突破。约 800--900 字。}
+
+国外研究从开阔海平均回波模型逐步转向受污染波形的分类处理。Brown 建立了随机粗糙海面的平均脉冲响应模型\cite{brown1977}，Hayne 进一步给出近天底入射条件下的平均回波表达式\cite{hayne1980}；两者奠定了基于波形前沿反演测距与波高、基于回波幅度估计后向散射系数的基础。但岸线进入足印后，均匀海面和近似高斯波高分布等假设不再充分。Deng 等分析澳大利亚近岸 ERS-2 波形，按形态选择拟合或不同阈值的重跟踪方法；在其研究区域中，可用海面高度观测从距岸约 22 km 延伸到约 5 km\cite{deng2006}。这一数字是特定海域、数据和检验准则下的结果，不能直接作为所有岸段的精度保证。Lefevre 等将有效波高引入高度计风速反演关系，说明仅凭后向散射系数估计风速会受到海况影响\cite{lefevre1994}。
+
+随着 COASTALT、PISTACH 等近海测高项目推进，研究重点扩展到波形重跟踪与潮汐、湿对流层等近岸改正量的联合改进\cite{vignudelli2011}。国内方面，鲍李峰等针对浅海区域测高波形开展重构研究\cite{baolifeng2004}；杨乐将波形分类及子波形提取用于中国近海资料处理\cite{yangle2009}；赵健等对海南近海 Envisat 波形重构后的海面高度质量进行评价\cite{zhao2013}。米银霞、展艺华分别围绕海洋参数反演及近岸回波处理开展研究\cite{miyinxia2019,zhanyihua2021}，徐浩则建立了基于电磁散射特性的高度计回波仿真方法\cite{xuhao2020}。近期研究还尝试利用先验海面高度和迭代阈值识别复杂近岸子波形，进一步增加可用观测\cite{tu2025}。
+
+不同重跟踪路线的适用条件并不相同：整波形物理拟合能够同时估计时延、展宽和幅度，但局部强散射峰会使模型残差及参数耦合增大；阈值和子波形方法较易避开受污染的尾部，却依赖前沿识别及阈值设定。仅比较重跟踪后保留的观测数量，也不足以判断其海面高度是否准确，还应同时报告与独立资料的偏差、离散度以及样本筛选比例。风速反演还须区分海况导致的真实散射变化与陆地污染带来的表观幅度变化。
+
+总体看，研究正由单一阈值或整波形拟合，发展为按波形形态自适应处理、利用邻近观测约束和跨数据源验证。现有成果多从实测波形出发评价算法，较少在可控的海陆复合散射场景中逐项追踪误差从环境参数到回波、再到 SSH、SWH 和风速的传播；近岸改正量不确定性也仍会限制最终产品质量。本课题将以物理仿真与实测对照结合，重点补充这一误差归因环节。
 
 % -------- 三、预计达到的目标、关键理论和技术、主要研究内容、方案及措施 -------- %
+\Needspace{8\baselineskip}
 \sect{三、预计达到的目标、关键理论和技术、主要研究内容、完成课题的方案及主要措施}
-\tbd{写什么：这是篇幅最大的一编部分（约 1200--1500 字），建议分（一）（二）（三）（四）小节，与论文章节对应：}
 
 \subsect{（一）预计达到的目标}
-\tbd{定量目标：完成近海回波仿真平台；重跟踪反演精度指标（SWH RMSE、风速 RMSE、近岸可用距离）；误差源识别与校正方案。}
+
+完成可重复运行的近海回波仿真程序，生成不同风速和海陆配置下的逐门波形，并以 Brown 平均回波作为开阔海对照。实现至少两类重跟踪方法，反演 SSH、SWH 和后向散射系数，在明确的散射—风速关系下估计风速。对每类方法报告偏差（Bias）、均方根误差（RMSE）、相关系数与有效波形比例；按距岸距离、目标位置和波形质量分组，给出近岸可用范围及失效条件。这里的可用距离和误差指标由数据检验确定，不预设跨海域通用的达标数值。
 
 \subsect{（二）关键理论和技术：海面建模与后向散射系数计算}
-\tbd{二维 PM 谱＋FFT/Monte-Carlo 生成粗糙海面；KA（Kirchhoff 近似）计算后向散射系数。公式示例（定稿替换为最终公式组）：}
-% 公式示例：
-% \begin{equation}
-%   \sigma^0=\frac{\rho}{\pi\sqrt{\sigma_u^2\sigma_c^2}}\;p(\tan\theta,0)
-% \end{equation}
+
+首先依据 Pierson--Moskowitz（PM）谱\cite{pm1964}和风向分布构造二维海面波数谱，通过频域随机相位及逆快速傅里叶变换生成多组粗糙海面，实现海面高度、相关尺度和坡度统计的检验。以 $\mathrm{SWH}=4\sigma_h$ 表征高斯近似下的有效波高，其中 $\sigma_h$ 为海面高度标准差。为避免有限网格遗漏短波造成的散射偏差，长波起伏由显式海面承担，短波影响由面元坡度概率分布参数化。
+
+近天底角的海面后向散射采用 Kirchhoff 近似下的几何光学描述，结合海水介电常数、局部入射角和坡度概率密度计算 $\sigma^0$。陆地面元设置独立的高程与介电、粗糙度参数，使陆地回波的强度和到达时延均可变化。该模型的适用范围须由波长、粗糙度和入射角条件检查；对盐度、温度等影响主要体现在介电常数和回波幅度的因素，单独进行灵敏度分析，不把它们误作由波形形状直接反演的量。
 
 \subsect{（三）关键理论和技术：回波波形仿真}
-\tbd{雷达系统参数（轨道高度 1336 km、Ku 波段 13.58 GHz、波束宽度 2.2°、采样频率 320 MHz）；基于雷达方程的面元散射功率叠加生成波形；不同风速下波形特征差异。插图示例（定稿启用）：}
-% \begin{figure}[H]
-%   \centering
-%   \includegraphics[width=0.8\textwidth]{echo_wind_family.png}
-%   \caption{不同风速下的仿真回波波形}
-% \end{figure}
+
+以 Jason-3 的 Ku 波段参数建立脉冲有限高度计几何：轨道高度约 1336 km、载频 13.575 GHz、天线 3 dB 波束宽度约 $2.2^\circ$，按 320 MHz 带宽对应的 3.125 ns 距离门间隔生成波形。对每个海面或陆地面元，计算距离 $R_i$、天线增益 $G_i$ 和后向散射系数 $\sigma_i^0$，依据雷达方程求其相对接收功率，再按双程时延 $2R_i/c$ 累加并与点目标响应卷积：
+\begin{equation}
+  P(t)\propto\sum_i\frac{G_i^2\sigma_i^0\Delta S_i}{R_i^4}\,
+  h\!\left(t-\frac{2R_i}{c}\right).
+\end{equation}
+式中 $\Delta S_i$ 为面元面积，$h$ 为系统响应；比例系数在同口径比较时保持一致。通过多次随机海面实现区分单次散斑波动与平均波形变化。先用纯海面情形同 Brown 模型比较前沿、平台和尾部，再逐步加入沙滩、礁石、岛屿以及不同海况，观察污染面元进入脉冲受限环后的波形变化。
 
 \subsect{（四）主要研究内容、完成课题的方案及主要措施}
-\tbd{近海参数（风速、SWH、盐度）变化与陆地干扰对回波的影响；“实测—仿真—理论”三方对比的误差分析方法（RMSE／Bias／相关系数）；误差分级校正策略与措施（进度保障、数据来源：Jason-3 SGDR、OIFD 融合 SWH、浮标）。}
+
+反演阶段先在纯海面样本上建立阈值法的前沿定位和宽度标定，再以 Brown/Hayne 类模型拟合波形的时延、展宽和幅度。利用相同输入波形比较不同算法，避免场景差异掩盖方法差异。误差分析分三层进行：其一，对随机海面多次实现逐条反演，评估散斑引起的离散程度及平均门数的作用；其二，把各近海场景与对应纯海面基线比较，量化海陆混合造成的系统偏差；其三，改变长波倾斜、散射参数或拟合模型，考察模型失配。对异常波形记录拟合残差、峰值位置和前沿连续性，尝试基于这些量筛选或选择重跟踪器，并检验筛选前后有效率与误差的权衡。
+
+验证采用“理论模型—数值仿真—实测数据”三方对照。理论模型检验程序物理与数值实现；仿真提供已知真值，用于区分误差机制；Jason-3 SGDR 波形及其标准产品用于检验近海真实波形的形态和相对改进。条件允许时，以融合有效波高资料或浮标作独立参照，但须先完成时间、空间匹配并标明参照资料自身的不确定性。SSH 比较还须统一轨道、潮汐、大气和海况偏差等改正口径，不能把改正量误差归于波形重跟踪。对同一轨段采用固定的距离分组和异常值规则，并记录每组样本量；在仿真中分别改变单一变量，再考察风速与陆地位置共同变化的情形，以免将交互作用误判为某一参数的独立效应。对于多次随机实现，除均值外给出离散范围，避免由少数波形推断整体精度。最后整理代码、图表与误差预算，明确算法适用的海况及离岸范围。
 
 % -------- 四、课题研究进度安排 -------- %
 \sect{四、课题研究进度安排}
-\tbd{下表沿用初稿的进度；若答辩时间线有调整，开学后按新的周次修改。}
 \begin{table}[H]
   \centering
   \xiaosihao
@@ -199,13 +215,26 @@
 \end{table}
 
 % -------- 五、主要参考文献 -------- %
-\sect{五、主要参考文献}
-\tbd{按 GB/T 7714 顺序编码制列 8--15 条：学位论文（徐浩、杨乐、米银霞、展艺华）＋经典外文（Brown 1977、Hayne 1980、Tsang 散射、Deng 2006 等）。初稿仅 6 条，建议补充 Brown 1977 与近两年文献。}
-% \begin{thebibliography}{9}\setlength{\itemsep}{0pt}
-%   \small
-%   \bibitem{xuhao2020} 徐浩. 基于电磁散射特性的雷达高度计回波仿真与分析[D]. 武汉: 华中科技大学, 2020.
-%   \bibitem{hayne1980} Hayne G S. Radar altimeter mean return waveforms from near-normal-incidence ocean surface scattering[J]. IEEE Transactions on Antennas and Propagation, 1980, 28(5): 687-692.
-% \end{thebibliography}
+\clearpage
+\begin{thebibliography}{15}
+  \setlength{\itemsep}{0pt}
+  \setlength{\parskip}{0pt}
+  \interlinepenalty=10000
+  \linespread{1.2}\selectfont\xiaosihao
+  \bibitem{brown1977} BROWN G S. The average impulse response of a rough surface and its applications[J]. IEEE Transactions on Antennas and Propagation, 1977, 25(1): 67--74.
+  \bibitem{hayne1980} HAYNE G S. Radar altimeter mean return waveforms from near-normal-incidence ocean surface scattering[J]. IEEE Transactions on Antennas and Propagation, 1980, 28(5): 687--692.
+  \bibitem{deng2006} DENG X, FEATHERSTONE W E. A coastal retracking system for satellite radar altimeter waveforms: Application to ERS-2 around Australia[J]. Journal of Geophysical Research: Oceans, 2006, 111(C6): C06012. DOI:10.1029/2005JC003039.
+  \bibitem{lefevre1994} LEFEVRE J M, BARCKICKE J, MENARD Y. A significant wave height dependent function for TOPEX/POSEIDON wind speed retrieval[J]. Journal of Geophysical Research: Oceans, 1994, 99(C12): 25035--25049.
+  \bibitem{vignudelli2011} VIGNUDELLI S, KOSTIANOY A G, CIPOLLINI P, et al. Coastal altimetry[M]. Berlin: Springer, 2011.
+  \bibitem{baolifeng2004} 鲍李峰, 陆洋, 许厚泽. 浅海区域 Topex/Poseidon 测高卫星数据波形重构方法[J]. 地球物理学报, 2004, 47(2): 216--221.
+  \bibitem{yangle2009} 杨乐. 卫星雷达高度计在中国近海及高海况下遥感反演算法研究[D]. 南京: 南京理工大学, 2009.
+  \bibitem{zhao2013} 赵健, 沈云中. 海南近海 Envisat 测高波形重构海面高质量评价[J]. 同济大学学报(自然科学版), 2013, 41(11): 1726--1731.
+  \bibitem{miyinxia2019} 米银霞. 卫星雷达高度计的海洋参数反演与近海重跟踪算法研究[D]. 武汉: 华中科技大学, 2019.
+  \bibitem{zhanyihua2021} 展艺华. 卫星雷达高度计近岸回波处理方法研究[D]. 北京: 中国科学院大学, 2021.
+  \bibitem{xuhao2020} 徐浩. 基于电磁散射特性的雷达高度计回波仿真与分析[D]. 武汉: 华中科技大学, 2020.
+  \bibitem{tu2025} TU Z, ZHANG C, JIANG T, et al. RSIT: A waveform retracking method based on reconstructed sea surface height and iterative threshold for coastal altimetry data[J]. International Journal of Applied Earth Observation and Geoinformation, 2025, 136: 104346. DOI:10.1016/j.jag.2024.104346.
+  \bibitem{pm1964} PIERSON W J, MOSKOWITZ L. A proposed spectral form for fully developed wind seas based on the similarity theory of S. A. Kitaigorodskii[J]. Journal of Geophysical Research, 1964, 69(24): 5181--5190.
+\end{thebibliography}
 
 % ============================ 封底：评审表 ========================== %
 % 标题与表格必须同页：局部收紧行距，单元格高度经过试算避免跨页
@@ -218,10 +247,10 @@
 \vspace{0.5em}
 \begin{center}
   \xiaosihao
-  \begin{tabular}{|>{\centering\arraybackslash}p{1.6cm}|p{2.9cm}|>{\centering\arraybackslash}p{1.6cm}|p{2.9cm}|>{\centering\arraybackslash}p{2.2cm}|p{2.9cm}|}
+  \begin{tabular}{|>{\centering\arraybackslash}p{2.7cm}|p{1.3cm}|>{\centering\arraybackslash}p{1.4cm}|p{2.4cm}|>{\centering\arraybackslash}p{1.9cm}|p{3.0cm}|}
     \hline
     姓名 & & 学号 & & 指导教师 & \\ \hline
-    院（系）专业 & \multicolumn{5}{p{12.5cm}|}{} \\ \hline
+    院（系）专业 & \multicolumn{5}{p{11.8cm}|}{} \\ \hline
     \multicolumn{6}{|p{14.9cm}|}{
       \centering\hei\bfseries 指导教师评语\par\vspace{0.2em}
       \song\raggedright
